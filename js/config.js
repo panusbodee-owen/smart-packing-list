@@ -3,7 +3,9 @@ export const APP_CONFIG = {
   STORAGE_KEYS: {
     CURRENT_TRIP: 'smart_packing_current_trip',
     SAVED_TRIPS: 'smart_packing_saved_trips',
-    SETTINGS: 'smart_packing_settings'
+    SETTINGS: 'smart_packing_settings',
+    THEME_MODE: 'smart_packing_theme_mode',
+    THEME_ACCENT: 'smart_packing_theme_accent'
   },
   MAX_DAYS: 16,
   MIN_DAYS: 1,

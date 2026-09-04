@@ -1,44 +1,94 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="light" data-accent="ocean">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart Packing List - จัดกระเป๋าตามสภาพอากาศ, คำนวณงบ & ชั่งน้ำหนักกระเป๋า</title>
-  <!-- Tailwind CSS -->
+  <!-- Tailwind CSS with Dark Mode -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
   <!-- Font Awesome 6 Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <!-- Custom CSS -->
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased min-h-screen flex flex-col transition-colors duration-200">
 
   <!-- Navigation Bar -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm no-print">
+  <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm no-print">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <!-- Brand & Creator Badge -->
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+        <div class="w-10 h-10 rounded-xl theme-btn-gradient flex items-center justify-center text-white shadow-md shadow-blue-500/20">
           <i class="fa-solid fa-suitcase-rolling text-xl"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold text-slate-900 leading-tight">Smart Packing List</h1>
-          <p class="text-xs text-slate-500">จัดกระเป๋าอัตโนมัติ • คำนวณงบทริป • จำลองน้ำหนักกระเป๋า</p>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-bold text-slate-900 dark:text-white leading-tight">Smart Packing List</h1>
+            <!-- Creator Badge -->
+            <a href="https://github.com/panusbodee-owen" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:scale-105 transition">
+              <i class="fa-solid fa-code text-[9px]"></i>
+              <span>Create By Panusbodee</span>
+            </a>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400">จัดกระเป๋าอัตโนมัติ • คำนวณงบทริป • จำลองน้ำหนักกระเป๋า</p>
         </div>
       </div>
 
+      <!-- Action Buttons & Theme Controls -->
       <div class="flex items-center space-x-2" id="header-actions">
-        <button id="btn-open-history" class="px-3 py-1.5 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition flex items-center space-x-1.5">
-          <i class="fa-solid fa-bookmark text-blue-600"></i>
-          <span class="hidden sm:inline">ทริปที่บันทึก</span>
+        <!-- Theme Controls -->
+        <div class="relative">
+          <button id="btn-theme-palette" title="ปรับแต่งธีมสี" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+            <i class="fa-solid fa-palette text-sm"></i>
+          </button>
+
+          <!-- Accent Palette Dropdown -->
+          <div id="palette-dropdown" class="hidden absolute right-0 mt-1.5 w-40 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-2 z-50 space-y-1 text-xs font-semibold">
+            <div class="text-[10px] text-slate-400 dark:text-slate-400 px-2 py-1 uppercase">เลือกโทนสี (Theme)</div>
+            <button class="theme-accent-opt w-full px-2.5 py-1.5 rounded-lg flex items-center space-x-2 hover:bg-slate-100 dark:hover:bg-slate-700 text-left transition" data-accent="ocean">
+              <span class="w-3.5 h-3.5 rounded-full bg-blue-600"></span>
+              <span>Ocean Blue (ค่าเริ่มต้น)</span>
+            </button>
+            <button class="theme-accent-opt w-full px-2.5 py-1.5 rounded-lg flex items-center space-x-2 hover:bg-slate-100 dark:hover:bg-slate-700 text-left transition" data-accent="sunset">
+              <span class="w-3.5 h-3.5 rounded-full bg-orange-600"></span>
+              <span>Sunset Orange</span>
+            </button>
+            <button class="theme-accent-opt w-full px-2.5 py-1.5 rounded-lg flex items-center space-x-2 hover:bg-slate-100 dark:hover:bg-slate-700 text-left transition" data-accent="forest">
+              <span class="w-3.5 h-3.5 rounded-full bg-emerald-600"></span>
+              <span>Forest Green</span>
+            </button>
+            <button class="theme-accent-opt w-full px-2.5 py-1.5 rounded-lg flex items-center space-x-2 hover:bg-slate-100 dark:hover:bg-slate-700 text-left transition" data-accent="purple">
+              <span class="w-3.5 h-3.5 rounded-full bg-purple-600"></span>
+              <span>Royal Purple</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dark / Light Toggle -->
+        <button id="btn-theme-dark-toggle" title="สลับโหมดมืด/สว่าง" class="p-2 text-slate-600 dark:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+          <i id="theme-dark-icon" class="fa-solid fa-moon text-sm"></i>
+        </button>
+
+        <!-- Saved Trips -->
+        <button id="btn-open-history" class="px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition flex items-center space-x-1.5">
+          <i class="fa-solid fa-bookmark text-blue-600 dark:text-blue-400"></i>
+          <span class="hidden md:inline">ทริปที่บันทึก</span>
           <span id="saved-trips-count" class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">0</span>
         </button>
 
-        <button id="btn-export-options" class="px-3 py-1.5 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition flex items-center space-x-1.5">
-          <i class="fa-solid fa-share-nodes text-indigo-600"></i>
-          <span class="hidden sm:inline">แชร์ / พิมพ์</span>
+        <!-- Export / Print -->
+        <button id="btn-export-options" class="px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition flex items-center space-x-1.5">
+          <i class="fa-solid fa-share-nodes text-indigo-600 dark:text-indigo-400"></i>
+          <span class="hidden md:inline">แชร์ / พิมพ์</span>
         </button>
 
-        <button id="btn-reset-trip" title="ล้างและเริ่มใหม่" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition">
+        <!-- Reset -->
+        <button id="btn-reset-trip" title="ล้างและเริ่มใหม่" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition">
           <i class="fa-solid fa-rotate-left"></i>
         </button>
       </div>
@@ -52,17 +102,18 @@
     <div class="hidden print-only mb-6 border-b pb-4">
       <h1 class="text-2xl font-bold" id="print-title">Smart Packing List</h1>
       <p class="text-sm text-slate-600" id="print-subtitle"></p>
+      <p class="text-xs text-slate-400 mt-1">Create By Panusbodee (panusbodee-owen)</p>
     </div>
 
     <!-- Search & Travel Planning Section (Card) -->
-    <section id="search-section" class="bg-white rounded-2xl p-5 sm:p-7 shadow-sm border border-slate-200 space-y-4">
+    <section id="search-section" class="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-7 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
       
       <!-- Top Row: City & Date Range -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
         
         <!-- City Input & Autocomplete (5 cols) -->
         <div class="lg:col-span-5 relative">
-          <label class="block text-sm font-semibold text-slate-700 mb-1.5">
+          <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
             <i class="fa-solid fa-location-dot text-rose-500 mr-1.5"></i> เมืองปลายทาง
           </label>
           <div class="relative">
@@ -71,53 +122,53 @@
               id="input-city" 
               placeholder="พิมพ์ชื่อเมือง เช่น โตเกียว, Tokyo, Chiang Mai, London..." 
               autocomplete="off"
-              class="w-full pl-10 pr-10 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder:text-slate-400 font-normal"
+              class="w-full pl-10 pr-10 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 dark:text-white transition placeholder:text-slate-400 font-normal"
             >
             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
               <i class="fa-solid fa-magnifying-glass"></i>
             </div>
-            <button id="btn-clear-city" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+            <button id="btn-clear-city" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
               <i class="fa-solid fa-circle-xmark"></i>
             </button>
           </div>
 
           <!-- Autocomplete Dropdown -->
-          <div id="autocomplete-list" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-50 autocomplete-dropdown divide-y divide-slate-100">
+          <div id="autocomplete-list" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 autocomplete-dropdown divide-y divide-slate-100 dark:divide-slate-700">
             <!-- Dynamically populated -->
           </div>
         </div>
 
         <!-- Travel Start Date (3 cols) -->
         <div class="lg:col-span-3">
-          <label class="block text-sm font-semibold text-slate-700 mb-1.5">
+          <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
             <i class="fa-regular fa-calendar-plus text-blue-500 mr-1.5"></i> วันที่เริ่มเดินทาง
           </label>
           <div class="relative">
             <input 
               type="date" 
               id="input-start-date" 
-              class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-800 transition"
+              class="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-800 dark:text-white transition"
             >
           </div>
         </div>
 
         <!-- Travel End Date (3 cols) -->
         <div class="lg:col-span-3">
-          <label class="block text-sm font-semibold text-slate-700 mb-1.5">
+          <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
             <i class="fa-regular fa-calendar-check text-indigo-500 mr-1.5"></i> วันที่สิ้นสุด (เดินทางกลับ)
           </label>
           <div class="relative">
             <input 
               type="date" 
               id="input-end-date" 
-              class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-800 transition"
+              class="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-800 dark:text-white transition"
             >
           </div>
         </div>
 
         <!-- Days Badge indicator (1 col) -->
         <div class="lg:col-span-1 flex flex-col justify-end">
-          <div class="h-[42px] px-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl flex flex-col items-center justify-center text-center">
+          <div class="h-[42px] px-2 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 rounded-xl flex flex-col items-center justify-center text-center">
             <span id="display-days" class="text-sm font-black leading-none">4</span>
             <span class="text-[9px] font-medium leading-tight">วัน</span>
           </div>
@@ -130,19 +181,19 @@
         <!-- Duration helper chips -->
         <div class="flex flex-wrap items-center gap-1.5 text-xs">
           <span class="text-slate-400 font-medium mr-1">ระยะเวลา:</span>
-          <button class="duration-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 rounded-lg text-slate-600 font-medium transition" data-days="3">3 วัน (สุดสัปดาห์)</button>
-          <button class="duration-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 rounded-lg text-slate-600 font-medium transition active-chip" data-days="4">4 วัน</button>
-          <button class="duration-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 rounded-lg text-slate-600 font-medium transition" data-days="5">5 วัน</button>
-          <button class="duration-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 rounded-lg text-slate-600 font-medium transition" data-days="7">7 วัน (1 สัปดาห์)</button>
-          <button class="duration-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 rounded-lg text-slate-600 font-medium transition" data-days="10">10 วัน</button>
-          <button class="duration-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 rounded-lg text-slate-600 font-medium transition" data-days="14">14 วัน (2 สัปดาห์)</button>
+          <button class="duration-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-900/60 hover:text-blue-700 dark:hover:text-blue-300 rounded-lg text-slate-600 dark:text-slate-300 font-medium transition" data-days="3">3 วัน (สุดสัปดาห์)</button>
+          <button class="duration-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-900/60 hover:text-blue-700 dark:hover:text-blue-300 rounded-lg text-slate-600 dark:text-slate-300 font-medium transition active-chip" data-days="4">4 วัน</button>
+          <button class="duration-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-900/60 hover:text-blue-700 dark:hover:text-blue-300 rounded-lg text-slate-600 dark:text-slate-300 font-medium transition" data-days="5">5 วัน</button>
+          <button class="duration-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-900/60 hover:text-blue-700 dark:hover:text-blue-300 rounded-lg text-slate-600 dark:text-slate-300 font-medium transition" data-days="7">7 วัน (1 สัปดาห์)</button>
+          <button class="duration-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-900/60 hover:text-blue-700 dark:hover:text-blue-300 rounded-lg text-slate-600 dark:text-slate-300 font-medium transition" data-days="10">10 วัน</button>
+          <button class="duration-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-900/60 hover:text-blue-700 dark:hover:text-blue-300 rounded-lg text-slate-600 dark:text-slate-300 font-medium transition" data-days="14">14 วัน (2 สัปดาห์)</button>
         </div>
 
         <!-- Submit Button -->
         <div class="shrink-0">
           <button 
             id="btn-generate-plan" 
-            class="w-full md:w-auto py-2.5 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-md shadow-blue-500/25 transition-all transform active:scale-[0.98] flex items-center justify-center space-x-2"
+            class="w-full md:w-auto py-2.5 px-6 theme-btn-gradient text-white font-semibold rounded-xl shadow-md shadow-blue-500/25 transition-all transform active:scale-[0.98] flex items-center justify-center space-x-2"
           >
             <span id="btn-generate-text">สร้างรายการจัดกระเป๋า</span>
             <i id="btn-generate-icon" class="fa-solid fa-wand-magic-sparkles text-sm"></i>
@@ -156,15 +207,15 @@
       </div>
 
       <!-- Quick City Chips -->
-      <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-1.5 text-xs">
+      <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-1.5 text-xs">
         <span class="text-slate-400 font-medium mr-1">เมืองยอดนิยม:</span>
-        <button class="city-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-slate-600 transition" data-city="Tokyo">🇯🇵 โตเกียว</button>
-        <button class="city-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-slate-600 transition" data-city="Seoul">🇰🇷 โซล</button>
-        <button class="city-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-slate-600 transition" data-city="London">🇬🇧 ลอนดอน</button>
-        <button class="city-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-slate-600 transition" data-city="Paris">🇫🇷 ปารีส</button>
-        <button class="city-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-slate-600 transition" data-city="Chiang Mai">🇹🇭 เชียงใหม่</button>
-        <button class="city-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-slate-600 transition" data-city="Singapore">🇸🇬 สิงคโปร์</button>
-        <button class="city-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-slate-600 transition" data-city="Reykjavik">🇮🇸 เรคยาวิก (หนาว)</button>
+        <button class="city-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg text-slate-600 dark:text-slate-300 transition" data-city="Tokyo">🇯🇵 โตเกียว</button>
+        <button class="city-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg text-slate-600 dark:text-slate-300 transition" data-city="Seoul">🇰🇷 โซล</button>
+        <button class="city-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg text-slate-600 dark:text-slate-300 transition" data-city="London">🇬🇧 ลอนดอน</button>
+        <button class="city-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg text-slate-600 dark:text-slate-300 transition" data-city="Paris">🇫🇷 ปารีส</button>
+        <button class="city-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg text-slate-600 dark:text-slate-300 transition" data-city="Chiang Mai">🇹🇭 เชียงใหม่</button>
+        <button class="city-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg text-slate-600 dark:text-slate-300 transition" data-city="Singapore">🇸🇬 สิงคโปร์</button>
+        <button class="city-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg text-slate-600 dark:text-slate-300 transition" data-city="Reykjavik">🇮🇸 เรคยาวิก (หนาว)</button>
       </div>
     </section>
 
@@ -221,34 +272,34 @@
       </div>
     </section>
 
-    <!-- NEW SECTION: Trip Budget & Booking Hub (คำนวณงบประมาณ, อัตราแลกเปลี่ยน, & ทางลัดจองตั๋ว) -->
-    <section id="budget-section" class="hidden bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-5">
+    <!-- Trip Budget & Booking Hub -->
+    <section id="budget-section" class="hidden bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-5">
       <!-- Section Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
         <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl shadow-sm">
             <i class="fa-solid fa-coins"></i>
           </div>
           <div>
-            <h2 class="text-lg font-bold text-slate-900">คำนวณงบประมาณ & อัตราแลกเปลี่ยน (Trip Budget)</h2>
-            <p class="text-xs text-slate-500">วางแผนงบประมาณทริปแบบ Real-time พร้อมเรทแลกเงินและทางลัดจองตั๋ว</p>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">คำนวณงบประมาณ & อัตราแลกเปลี่ยน (Trip Budget)</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">วางแผนงบประมาณทริปแบบ Real-time พร้อมเรทแลกเงินและทางลัดจองตั๋ว</p>
           </div>
         </div>
 
         <!-- Live Currency Rate Badge -->
-        <div class="bg-emerald-50/80 border border-emerald-200/80 rounded-xl px-3 py-1.5 flex items-center space-x-2 text-xs">
-          <i class="fa-solid fa-arrow-right-arrow-left text-emerald-600"></i>
-          <span class="text-slate-600 font-medium">เรทแลกเงินวันนี้:</span>
-          <span id="budget-exchange-rate-text" class="font-bold text-emerald-700">1 THB ≈ 4.73 JPY</span>
+        <div class="bg-emerald-50/80 dark:bg-emerald-950/60 border border-emerald-200/80 dark:border-emerald-800 rounded-xl px-3 py-1.5 flex items-center space-x-2 text-xs">
+          <i class="fa-solid fa-arrow-right-arrow-left text-emerald-600 dark:text-emerald-400"></i>
+          <span class="text-slate-600 dark:text-slate-300 font-medium">เรทแลกเงินวันนี้:</span>
+          <span id="budget-exchange-rate-text" class="font-bold text-emerald-700 dark:text-emerald-300">1 THB ≈ 4.73 JPY</span>
         </div>
       </div>
 
       <!-- Quick Booking Shortcuts (UX Booster) -->
-      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100/80 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800/80 border border-blue-100/80 dark:border-slate-700 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center space-x-2">
-          <i class="fa-solid fa-ticket text-blue-600"></i>
-          <span class="text-xs font-bold text-slate-800">ค้นหาและจองตั๋วช่วงวันเดินทาง:</span>
-          <span id="booking-city-date-label" class="text-xs text-slate-500 hidden sm:inline"></span>
+          <i class="fa-solid fa-ticket text-blue-600 dark:text-blue-400"></i>
+          <span class="text-xs font-bold text-slate-800 dark:text-white">ค้นหาและจองตั๋วช่วงวันเดินทาง:</span>
+          <span id="booking-city-date-label" class="text-xs text-slate-500 dark:text-slate-400 hidden sm:inline"></span>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <a id="link-search-flights" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center space-x-1.5">
@@ -256,12 +307,12 @@
             <span>ค้นหาตั๋วเครื่องบิน</span>
             <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75"></i>
           </a>
-          <a id="link-search-hotels" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold shadow-sm transition flex items-center space-x-1.5">
+          <a id="link-search-hotels" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-semibold shadow-sm transition flex items-center space-x-1.5">
             <i class="fa-solid fa-hotel text-amber-500 text-[11px]"></i>
             <span>ค้นหาที่พัก</span>
             <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75"></i>
           </a>
-          <a id="link-search-activities" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold shadow-sm transition flex items-center space-x-1.5">
+          <a id="link-search-activities" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-semibold shadow-sm transition flex items-center space-x-1.5">
             <i class="fa-solid fa-ticket-simple text-rose-500 text-[11px]"></i>
             <span>ตั๋วสถานที่เที่ยว</span>
             <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75"></i>
@@ -274,64 +325,64 @@
         
         <!-- Interactive Budget Form (7 cols) -->
         <div class="lg:col-span-7 space-y-3">
-          <div class="text-xs font-bold text-slate-700 flex items-center justify-between">
+          <div class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
             <span>หมวดหมู่ค่าใช้จ่ายโดยประมาณ (บาท):</span>
-            <button id="btn-suggest-budget" class="text-[11px] text-blue-600 hover:underline flex items-center gap-1 font-medium">
+            <button id="btn-suggest-budget" class="text-[11px] text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-medium">
               <i class="fa-solid fa-wand-magic-sparkles"></i> คำนวณแนะนำอัตโนมัติ
             </button>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
             <!-- Flights -->
-            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-              <label class="block text-slate-500 mb-1 font-medium">✈️ ตั๋วเครื่องบิน & เดินทางไป-กลับ</label>
+            <div class="bg-slate-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
+              <label class="block text-slate-500 dark:text-slate-400 mb-1 font-medium">✈️ ตั๋วเครื่องบิน & เดินทางไป-กลับ</label>
               <div class="relative">
-                <input type="number" id="budget-flights" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none" value="12000">
+                <input type="number" id="budget-flights" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" value="12000">
                 <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 font-medium">฿</span>
               </div>
             </div>
 
             <!-- Hotel -->
-            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-              <label class="block text-slate-500 mb-1 font-medium">🏨 ที่พักตลอดทริป</label>
+            <div class="bg-slate-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
+              <label class="block text-slate-500 dark:text-slate-400 mb-1 font-medium">🏨 ที่พักตลอดทริป</label>
               <div class="relative">
-                <input type="number" id="budget-hotel" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none" value="8000">
+                <input type="number" id="budget-hotel" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" value="8000">
                 <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 font-medium">฿</span>
               </div>
             </div>
 
             <!-- Food & Transport -->
-            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-              <label class="block text-slate-500 mb-1 font-medium">🍜 ค่าอาหาร & เดินทางในเมือง</label>
+            <div class="bg-slate-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
+              <label class="block text-slate-500 dark:text-slate-400 mb-1 font-medium">🍜 ค่าอาหาร & เดินทางในเมือง</label>
               <div class="relative">
-                <input type="number" id="budget-food" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none" value="6000">
+                <input type="number" id="budget-food" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" value="6000">
                 <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 font-medium">฿</span>
               </div>
             </div>
 
             <!-- Activities -->
-            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-              <label class="block text-slate-500 mb-1 font-medium">🎟️ บัตรผ่าน & ค่าเข้าชม</label>
+            <div class="bg-slate-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
+              <label class="block text-slate-500 dark:text-slate-400 mb-1 font-medium">🎟️ บัตรผ่าน & ค่าเข้าชม</label>
               <div class="relative">
-                <input type="number" id="budget-activities" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none" value="3000">
+                <input type="number" id="budget-activities" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" value="3000">
                 <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 font-medium">฿</span>
               </div>
             </div>
 
             <!-- Shopping -->
-            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-              <label class="block text-slate-500 mb-1 font-medium">🛍️ ช้อปปิ้งของฝาก</label>
+            <div class="bg-slate-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
+              <label class="block text-slate-500 dark:text-slate-400 mb-1 font-medium">🛍️ ช้อปปิ้งของฝาก</label>
               <div class="relative">
-                <input type="number" id="budget-shopping" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none" value="5000">
+                <input type="number" id="budget-shopping" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" value="5000">
                 <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 font-medium">฿</span>
               </div>
             </div>
 
             <!-- Emergency -->
-            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-              <label class="block text-slate-500 mb-1 font-medium">🚨 งบสำรองฉุกเฉิน</label>
+            <div class="bg-slate-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
+              <label class="block text-slate-500 dark:text-slate-400 mb-1 font-medium">🚨 งบสำรองฉุกเฉิน</label>
               <div class="relative">
-                <input type="number" id="budget-emergency" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none" value="2000">
+                <input type="number" id="budget-emergency" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" value="2000">
                 <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 font-medium">฿</span>
               </div>
             </div>
@@ -339,7 +390,7 @@
         </div>
 
         <!-- Budget Summary & Currency Card (5 cols) -->
-        <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl p-5 space-y-4 shadow-md">
+        <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-950 dark:to-slate-900 text-white rounded-xl p-5 space-y-4 shadow-md border border-slate-800">
           <div>
             <span class="text-xs uppercase tracking-wider text-emerald-400 font-bold">งบประมาณรวมทั้งทริป</span>
             <div class="flex items-baseline space-x-2 mt-1">
@@ -380,22 +431,22 @@
     </section>
 
     <!-- Luggage Weight Calculator Card -->
-    <section id="weight-section" class="hidden bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-4">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+    <section id="weight-section" class="hidden bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
         <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl shadow-sm">
             <i class="fa-solid fa-scale-balanced"></i>
           </div>
           <div>
-            <h2 class="text-lg font-bold text-slate-900">จำลองและชั่งน้ำหนักกระเป๋าเดินทาง (Luggage Scale)</h2>
-            <p class="text-xs text-slate-500">คำนวณน้ำหนักสิ่งของและกระเป๋าเปล่า เทียบกับโควตาสายการบิน</p>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">จำลองและชั่งน้ำหนักกระเป๋าเดินทาง (Luggage Scale)</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">คำนวณน้ำหนักสิ่งของและกระเป๋าเปล่า เทียบกับโควตาสายการบิน</p>
           </div>
         </div>
 
         <!-- Luggage Allowance Preset Selector -->
         <div class="flex flex-wrap items-center gap-2">
-          <label class="text-xs font-semibold text-slate-600">โควตาสายการบิน:</label>
-          <select id="select-baggage-preset" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <label class="text-xs font-semibold text-slate-600 dark:text-slate-300">โควตาสายการบิน:</label>
+          <select id="select-baggage-preset" class="text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
             <!-- Populated via JS -->
           </select>
         </div>
@@ -404,13 +455,13 @@
       <!-- Weight Gauge & Metrics Grid -->
       <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
         <!-- Current Weight Display (4 cols) -->
-        <div class="md:col-span-4 bg-slate-50 rounded-xl p-4 border border-slate-200 flex flex-col justify-center text-center">
-          <span class="text-xs text-slate-500 font-medium">น้ำหนักรวมกระเป๋าปัจจุบัน</span>
+        <div class="md:col-span-4 bg-slate-50 dark:bg-slate-800/70 rounded-xl p-4 border border-slate-200 dark:border-slate-700 flex flex-col justify-center text-center">
+          <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">น้ำหนักรวมกระเป๋าปัจจุบัน</span>
           <div class="flex items-baseline justify-center space-x-1.5 my-1">
-            <span id="weight-current-kg" class="text-3xl font-black text-slate-900">0.0</span>
-            <span class="text-base font-bold text-slate-500">/ <span id="weight-limit-kg">20.0</span> kg</span>
+            <span id="weight-current-kg" class="text-3xl font-black text-slate-900 dark:text-white">0.0</span>
+            <span class="text-base font-bold text-slate-500 dark:text-slate-400">/ <span id="weight-limit-kg">20.0</span> kg</span>
           </div>
-          <div id="weight-remaining-badge" class="inline-flex items-center justify-center text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full mt-1">
+          <div id="weight-remaining-badge" class="inline-flex items-center justify-center text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 px-2.5 py-1 rounded-full mt-1">
             <i class="fa-solid fa-bag-shopping mr-1"></i>
             <span id="weight-remaining-text">เหลือพื้นที่ช้อปปิ้ง 20.0 kg</span>
           </div>
@@ -419,27 +470,27 @@
         <!-- Weight Progress Bar & Details (8 cols) -->
         <div class="md:col-span-8 space-y-3">
           <div class="flex justify-between items-center text-xs font-semibold">
-            <span class="text-slate-600 flex items-center gap-1">
+            <span class="text-slate-600 dark:text-slate-300 flex items-center gap-1">
               <i class="fa-solid fa-chart-pie text-blue-500"></i> สัดส่วนน้ำหนักที่ใช้ไป:
             </span>
-            <span id="weight-percentage-text" class="text-blue-600 font-bold">0%</span>
+            <span id="weight-percentage-text" class="text-blue-600 dark:text-blue-400 font-bold">0%</span>
           </div>
 
           <!-- Weight Bar -->
-          <div class="w-full bg-slate-100 rounded-full h-4 overflow-hidden border border-slate-200 p-0.5">
+          <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-4 overflow-hidden border border-slate-200 dark:border-slate-700 p-0.5">
             <div id="weight-bar-fill" class="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-blue-500 to-indigo-600 w-0"></div>
           </div>
 
           <!-- Sub-breakdown & Options -->
-          <div class="flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2 pt-1">
+          <div class="flex flex-wrap items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2 pt-1">
             <div class="flex items-center space-x-3">
-              <span>🧳 กระเป๋าเปล่า: <strong id="weight-empty-bag-text" class="text-slate-700">3.8 kg</strong></span>
+              <span>🧳 กระเป๋าเปล่า: <strong id="weight-empty-bag-text" class="text-slate-700 dark:text-slate-200">3.8 kg</strong></span>
               <span>•</span>
-              <span>👕 สัมภาระ: <strong id="weight-items-text" class="text-slate-700">0.0 kg</strong></span>
+              <span>👕 สัมภาระ: <strong id="weight-items-text" class="text-slate-700 dark:text-slate-200">0.0 kg</strong></span>
             </div>
 
             <div class="flex items-center space-x-2">
-              <label class="text-[11px] text-slate-500 flex items-center cursor-pointer">
+              <label class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center cursor-pointer">
                 <input type="checkbox" id="check-weight-packed-only" class="mr-1.5 accent-blue-600 rounded">
                 <span>คิดเฉพาะของที่ติ๊กเก็บแล้ว</span>
               </label>
@@ -449,11 +500,11 @@
       </div>
 
       <!-- Overweight Warning Alert Banner -->
-      <div id="weight-overweight-alert" class="hidden bg-rose-50 border border-rose-200 rounded-xl p-3 text-xs sm:text-sm text-rose-800 flex items-start space-x-2.5">
-        <i class="fa-solid fa-triangle-exclamation text-rose-600 text-lg mt-0.5 shrink-0"></i>
+      <div id="weight-overweight-alert" class="hidden bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 rounded-xl p-3 text-xs sm:text-sm text-rose-800 dark:text-rose-200 flex items-start space-x-2.5">
+        <i class="fa-solid fa-triangle-exclamation text-rose-600 dark:text-rose-400 text-lg mt-0.5 shrink-0"></i>
         <div>
           <strong class="font-bold">คำเตือน: น้ำหนักกระเป๋าเกินโควตาสายการบิน!</strong>
-          <p class="text-xs text-rose-700 mt-0.5" id="weight-overweight-desc">
+          <p class="text-xs text-rose-700 dark:text-rose-300 mt-0.5" id="weight-overweight-desc">
             น้ำหนักเกินไป 0.0 kg แนะนำให้นำของชิ้นหนักออก เช่น เสื้อผ้าหนา หรือซื้อน้ำหนักกระเป๋าเพิ่มกับสายการบินล่วงหน้า
           </p>
         </div>
@@ -464,52 +515,52 @@
     <section id="checklist-section" class="hidden space-y-5">
 
       <!-- Progress Tracking Card -->
-      <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200">
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 dark:border-slate-800">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div>
             <div class="flex items-center space-x-2">
-              <h2 class="text-xl font-bold text-slate-900">รายการสิ่งของที่ต้องเตรียม</h2>
-              <span id="badge-total-items" class="bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">0 ชิ้น</span>
+              <h2 class="text-xl font-bold text-slate-900 dark:text-white">รายการสิ่งของที่ต้องเตรียม</h2>
+              <span id="badge-total-items" class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold px-2.5 py-0.5 rounded-full">0 ชิ้น</span>
             </div>
-            <p class="text-xs text-slate-500 mt-0.5" id="progress-status-text">ติ๊กเลือกเมื่อเก็บของลงกระเป๋าแล้ว ข้อมูลจะถูกบันทึกอัตโนมัติ</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" id="progress-status-text">ติ๊กเลือกเมื่อเก็บของลงกระเป๋าแล้ว ข้อมูลจะถูกบันทึกอัตโนมัติ</p>
           </div>
 
           <!-- Progress Percentage Display -->
           <div class="flex items-center space-x-3">
             <div class="text-right">
-              <div class="text-2xl font-black text-blue-600" id="progress-percent">0%</div>
-              <div class="text-[11px] text-slate-500" id="progress-count">จัดแล้ว 0 / 0 ชิ้น</div>
+              <div class="text-2xl font-black text-blue-600 dark:text-blue-400" id="progress-percent">0%</div>
+              <div class="text-[11px] text-slate-500 dark:text-slate-400" id="progress-count">จัดแล้ว 0 / 0 ชิ้น</div>
             </div>
           </div>
         </div>
 
         <!-- Progress Bar Line -->
-        <div class="w-full bg-slate-100 rounded-full h-3.5 overflow-hidden border border-slate-200/80 p-0.5">
-          <div id="progress-bar-fill" class="progress-bar-fill bg-gradient-to-r from-blue-500 to-indigo-600 h-full rounded-full w-0"></div>
+        <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3.5 overflow-hidden border border-slate-200/80 dark:border-slate-700 p-0.5">
+          <div id="progress-bar-fill" class="progress-bar-fill theme-btn-gradient h-full rounded-full w-0"></div>
         </div>
 
         <!-- Toolbar: Filters & Quick Actions -->
-        <div class="flex flex-wrap items-center justify-between gap-3 mt-5 pt-4 border-t border-slate-100 no-print">
+        <div class="flex flex-wrap items-center justify-between gap-3 mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 no-print">
           <!-- Filter Tabs -->
-          <div class="inline-flex p-1 bg-slate-100 rounded-xl space-x-1 text-xs font-medium">
-            <button class="filter-tab px-3 py-1.5 rounded-lg transition bg-white text-slate-900 shadow-sm" data-filter="all">ทั้งหมด (<span id="count-all">0</span>)</button>
-            <button class="filter-tab px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900" data-filter="unpacked">ยังไม่เก็บ (<span id="count-unpacked">0</span>)</button>
-            <button class="filter-tab px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900" data-filter="packed">เก็บแล้ว (<span id="count-packed">0</span>)</button>
+          <div class="inline-flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl space-x-1 text-xs font-medium">
+            <button class="filter-tab px-3 py-1.5 rounded-lg transition bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm" data-filter="all">ทั้งหมด (<span id="count-all">0</span>)</button>
+            <button class="filter-tab px-3 py-1.5 rounded-lg transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white" data-filter="unpacked">ยังไม่เก็บ (<span id="count-unpacked">0</span>)</button>
+            <button class="filter-tab px-3 py-1.5 rounded-lg transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white" data-filter="packed">เก็บแล้ว (<span id="count-packed">0</span>)</button>
           </div>
 
           <!-- Action Buttons -->
           <div class="flex flex-wrap items-center gap-2">
-            <button id="btn-add-item-modal" class="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition flex items-center space-x-1">
+            <button id="btn-add-item-modal" class="px-3 py-1.5 text-xs font-semibold text-white theme-btn-gradient rounded-lg shadow-sm transition flex items-center space-x-1">
               <i class="fa-solid fa-plus"></i>
               <span>เพิ่มของเอง</span>
             </button>
-            <button id="btn-check-all" class="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+            <button id="btn-check-all" class="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition">
               <i class="fa-solid fa-check-double mr-1"></i> ติ๊กทั้งหมด
             </button>
-            <button id="btn-uncheck-all" class="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+            <button id="btn-uncheck-all" class="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition">
               <i class="fa-solid fa-xmark mr-1"></i> ยกเลิกทั้งหมด
             </button>
-            <button id="btn-save-trip-bookmark" class="px-3 py-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition flex items-center space-x-1">
+            <button id="btn-save-trip-bookmark" class="px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 rounded-lg transition flex items-center space-x-1">
               <i class="fa-solid fa-floppy-disk"></i>
               <span>บันทึกทริปนี้</span>
             </button>
@@ -524,18 +575,18 @@
     </section>
 
     <!-- Empty State / Welcome Screen -->
-    <section id="empty-state" class="bg-white rounded-2xl p-10 sm:p-14 text-center border border-slate-200 shadow-sm space-y-4">
-      <div class="w-20 h-20 mx-auto rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-3xl shadow-inner">
+    <section id="empty-state" class="bg-white dark:bg-slate-900 rounded-2xl p-10 sm:p-14 text-center border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+      <div class="w-20 h-20 mx-auto rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center text-3xl shadow-inner">
         <i class="fa-solid fa-map-location-dot"></i>
       </div>
       <div class="max-w-md mx-auto">
-        <h3 class="text-xl font-bold text-slate-800">พร้อมจัดกระเป๋าแล้วหรือยัง?</h3>
-        <p class="text-sm text-slate-500 mt-1">
+        <h3 class="text-xl font-bold text-slate-800 dark:text-white">พร้อมจัดกระเป๋าแล้วหรือยัง?</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
           เลือกเมืองปลายทางและช่วงวันเดินทางด้านบน เพื่อให้ระบบดึงข้อมูลพยากรณ์อากาศแบบตรงวัน พร้อมคำนวณงบประมาณและจำลองน้ำหนักกระเป๋าให้อัตโนมัติ!
         </p>
       </div>
       <div class="pt-2 flex justify-center gap-2">
-        <button class="px-4 py-2 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition" onclick="document.getElementById('input-city').focus()">
+        <button class="px-4 py-2 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-xl transition" onclick="document.getElementById('input-city').focus()">
           เริ่มค้นหาเมืองเลย <i class="fa-solid fa-arrow-up ml-1"></i>
         </button>
       </div>
@@ -543,81 +594,87 @@
 
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-white border-t border-slate-200 py-5 text-center text-xs text-slate-400 no-print mt-auto">
-    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-      <div>Smart Packing List &copy; 2026 • ข้อมูลสภาพอากาศ Open-Meteo & เรทแลกเงิน Interbank</div>
-      <div class="flex items-center space-x-3 text-slate-500">
-        <span><i class="fa-solid fa-coins text-emerald-500 mr-1"></i>คำนวณงบประมาณ</span>
+  <!-- Footer with Author Credit -->
+  <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-500 dark:text-slate-400 no-print mt-auto">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center space-x-2">
+        <span>Smart Packing List &copy; 2026</span>
         <span>•</span>
-        <span><i class="fa-solid fa-scale-balanced text-amber-500 mr-1"></i>ชั่งน้ำหนักกระเป๋า</span>
+        <a href="https://github.com/panusbodee-owen" target="_blank" rel="noopener noreferrer" class="font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+          <i class="fa-brands fa-github"></i> Create By Panusbodee
+        </a>
+      </div>
+      <div class="flex items-center space-x-3 text-slate-500 dark:text-slate-400">
+        <span><i class="fa-solid fa-coins text-emerald-500 mr-1"></i>คำนวณงบ</span>
         <span>•</span>
-        <span><i class="fa-solid fa-database text-blue-500 mr-1"></i>บันทึก LocalStorage</span>
+        <span><i class="fa-solid fa-scale-balanced text-amber-500 mr-1"></i>ชั่งน้ำหนัก</span>
+        <span>•</span>
+        <span><i class="fa-solid fa-cloud-sun text-blue-500 mr-1"></i>สภาพอากาศสด</span>
       </div>
     </div>
   </footer>
 
   <!-- MODAL: Add Custom Item -->
-  <div id="modal-add-item" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-slate-900/50">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-100">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-          <i class="fa-solid fa-circle-plus text-blue-600"></i> เพิ่มสิ่งของในรายการ
+  <div id="modal-add-item" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-slate-900/60">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-100 dark:border-slate-800">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-circle-plus text-blue-600 dark:text-blue-400"></i> เพิ่มสิ่งของในรายการ
         </h3>
-        <button id="btn-close-add-modal" class="text-slate-400 hover:text-slate-600 p-1">
+        <button id="btn-close-add-modal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
 
       <form id="form-add-item" class="space-y-3.5">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อสิ่งของ *</label>
-          <input type="text" id="add-item-name" required placeholder="เช่น กล้องถ่ายรูป, คอนแทคเลนส์, ขาตั้งกล้อง" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">ชื่อสิ่งของ *</label>
+          <input type="text" id="add-item-name" required placeholder="เช่น กล้องถ่ายรูป, คอนแทคเลนส์, ขาตั้งกล้อง" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
         </div>
 
         <div class="grid grid-cols-3 gap-2.5">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">จำนวน</label>
-            <input type="number" id="add-item-qty" min="1" max="99" value="1" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">จำนวน</label>
+            <input type="number" id="add-item-qty" min="1" max="99" value="1" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">หน่วย</label>
-            <input type="text" id="add-item-unit" value="ชิ้น" placeholder="ชิ้น, อัน, ตัว" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">หน่วย</label>
+            <input type="text" id="add-item-unit" value="ชิ้น" placeholder="ชิ้น, อัน, ตัว" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">น้ำหนัก (กรัม)</label>
-            <input type="number" id="add-item-weight" min="1" max="10000" value="150" placeholder="150" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">น้ำหนัก (กรัม)</label>
+            <input type="number" id="add-item-weight" min="1" max="10000" value="150" placeholder="150" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">หมวดหมู่</label>
-          <select id="add-item-category" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">หมวดหมู่</label>
+          <select id="add-item-category" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
             <!-- Populated via JS -->
           </select>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">หมายเหตุ / เหตุผล (ไม่บังคับ)</label>
-          <input type="text" id="add-item-reason" placeholder="เช่น ใช้ถ่ายภาพกลางคืน" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">หมายเหตุ / เหตุผล (ไม่บังคับ)</label>
+          <input type="text" id="add-item-reason" placeholder="เช่น ใช้ถ่ายภาพกลางคืน" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
         </div>
 
-        <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100">
-          <button type="button" id="btn-cancel-add" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition">ยกเลิก</button>
-          <button type="submit" class="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition">เพิ่มรายการ</button>
+        <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <button type="button" id="btn-cancel-add" class="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">ยกเลิก</button>
+          <button type="submit" class="px-4 py-2 text-xs font-semibold text-white theme-btn-gradient rounded-lg shadow-sm transition">เพิ่มรายการ</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- MODAL: Saved Trips History -->
-  <div id="modal-history" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-slate-900/50">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-slate-100 max-h-[85vh] flex flex-col">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-          <i class="fa-solid fa-clock-rotate-left text-blue-600"></i> ทริปที่บันทึกไว้ใน LocalStorage
+  <div id="modal-history" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-slate-900/60">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-slate-100 dark:border-slate-800 max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left text-blue-600 dark:text-blue-400"></i> ทริปที่บันทึกไว้ใน LocalStorage
         </h3>
-        <button id="btn-close-history-modal" class="text-slate-400 hover:text-slate-600 p-1">
+        <button id="btn-close-history-modal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
@@ -626,59 +683,59 @@
         <!-- Populated via JS -->
       </div>
 
-      <div class="flex items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-500">
+      <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
         <span>บันทึกประวัติสูงสุด 20 ทริป</span>
-        <button id="btn-close-history-footer" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg font-medium text-slate-700 transition">ปิด</button>
+        <button id="btn-close-history-footer" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg font-medium text-slate-700 dark:text-slate-200 transition">ปิด</button>
       </div>
     </div>
   </div>
 
   <!-- MODAL: Export / Share Options -->
-  <div id="modal-export" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-slate-900/50">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-100">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-          <i class="fa-solid fa-share-from-square text-indigo-600"></i> แชร์หรือส่งออกรายการ
+  <div id="modal-export" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-slate-900/60">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-100 dark:border-slate-800">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-share-from-square text-indigo-600 dark:text-indigo-400"></i> แชร์หรือส่งออกรายการ
         </h3>
-        <button id="btn-close-export-modal" class="text-slate-400 hover:text-slate-600 p-1">
+        <button id="btn-close-export-modal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
 
       <div class="space-y-2.5">
-        <button id="btn-action-copy-text" class="w-full p-3 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-xl flex items-center space-x-3 text-left transition group">
-          <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-lg shrink-0 group-hover:scale-105 transition">
+        <button id="btn-action-copy-text" class="w-full p-3 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center space-x-3 text-left transition group">
+          <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 flex items-center justify-center text-lg shrink-0 group-hover:scale-105 transition">
             <i class="fa-solid fa-copy"></i>
           </div>
           <div>
-            <div class="text-sm font-semibold text-slate-800">คัดลอกข้อความ (Copy to Clipboard)</div>
-            <div class="text-xs text-slate-500">คัดลอกรายการเช็กลิสต์, สรุปงบประมาณ และน้ำหนักนำไปส่งใน LINE</div>
+            <div class="text-sm font-semibold text-slate-800 dark:text-white">คัดลอกข้อความ (Copy to Clipboard)</div>
+            <div class="text-xs text-slate-500 dark:text-slate-400">คัดลอกรายการเช็กลิสต์, สรุปงบประมาณ และน้ำหนักนำไปส่งใน LINE</div>
           </div>
         </button>
 
-        <button id="btn-action-print" class="w-full p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 rounded-xl flex items-center space-x-3 text-left transition group">
-          <div class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg shrink-0 group-hover:scale-105 transition">
+        <button id="btn-action-print" class="w-full p-3 bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center space-x-3 text-left transition group">
+          <div class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center text-lg shrink-0 group-hover:scale-105 transition">
             <i class="fa-solid fa-print"></i>
           </div>
           <div>
-            <div class="text-sm font-semibold text-slate-800">พิมพ์หรือบันทึกเป็น PDF (Print)</div>
-            <div class="text-xs text-slate-500">พิมพ์ใบเช็กลิสต์แบบกระดาษหรือเซฟเป็นไฟล์ PDF</div>
+            <div class="text-sm font-semibold text-slate-800 dark:text-white">พิมพ์หรือบันทึกเป็น PDF (Print)</div>
+            <div class="text-xs text-slate-500 dark:text-slate-400">พิมพ์ใบเช็กลิสต์แบบกระดาษหรือเซฟเป็นไฟล์ PDF</div>
           </div>
         </button>
 
-        <button id="btn-action-download-json" class="w-full p-3 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 rounded-xl flex items-center space-x-3 text-left transition group">
-          <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg shrink-0 group-hover:scale-105 transition">
+        <button id="btn-action-download-json" class="w-full p-3 bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center space-x-3 text-left transition group">
+          <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-300 flex items-center justify-center text-lg shrink-0 group-hover:scale-105 transition">
             <i class="fa-solid fa-file-code"></i>
           </div>
           <div>
-            <div class="text-sm font-semibold text-slate-800">ดาวน์โหลดเป็น JSON</div>
-            <div class="text-xs text-slate-500">สำรองข้อมูลโครงสร้างครบถ้วนสำหรับนักพัฒนา</div>
+            <div class="text-sm font-semibold text-slate-800 dark:text-white">ดาวน์โหลดเป็น JSON</div>
+            <div class="text-xs text-slate-500 dark:text-slate-400">สำรองข้อมูลโครงสร้างครบถ้วนสำหรับนักพัฒนา</div>
           </div>
         </button>
       </div>
 
       <div class="pt-2 text-center">
-        <button id="btn-close-export-footer" class="px-4 py-2 text-xs font-medium text-slate-500 hover:text-slate-800 transition">ปิดหน้าต่าง</button>
+        <button id="btn-close-export-footer" class="px-4 py-2 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition">ปิดหน้าต่าง</button>
       </div>
     </div>
   </div>

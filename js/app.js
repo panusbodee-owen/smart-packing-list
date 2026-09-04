@@ -20,6 +20,10 @@ class SmartPackingApp {
       items: [],
       filter: 'all',
       isLoading: false,
+      theme: {
+        mode: 'light',
+        accent: 'ocean'
+      },
       baggage: {
         presetId: 'checked_20',
         limitKg: 20,
@@ -62,6 +66,13 @@ class SmartPackingApp {
       btnGenerateIcon: document.getElementById('btn-generate-icon'),
       btnGenerateSpinner: document.getElementById('btn-generate-spinner'),
       cityChips: document.querySelectorAll('.city-chip'),
+
+      // Theme Elements
+      btnThemePalette: document.getElementById('btn-theme-palette'),
+      paletteDropdown: document.getElementById('palette-dropdown'),
+      themeAccentOpts: document.querySelectorAll('.theme-accent-opt'),
+      btnThemeDarkToggle: document.getElementById('btn-theme-dark-toggle'),
+      themeDarkIcon: document.getElementById('theme-dark-icon'),
 
       // Sections
       emptyState: document.getElementById('empty-state'),
@@ -185,6 +196,7 @@ class SmartPackingApp {
   }
 
   init() {
+    this.initTheme();
     this.populateCategorySelect();
     this.populateBaggagePresets();
     this.setupDateInputs();
@@ -197,6 +209,36 @@ class SmartPackingApp {
       this.restoreTrip(savedTrip);
       this.showToast('โหลดข้อมูลทริปล่าสุดจาก LocalStorage เรียบร้อยแล้ว', 'info');
     }
+  }
+
+  initTheme() {
+    // Mode (Light / Dark)
+    const savedMode = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.THEME_MODE) || 
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    
+    // Accent (ocean, sunset, forest, purple)
+    const savedAccent = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.THEME_ACCENT) || 'ocean';
+
+    this.setThemeMode(savedMode);
+    this.setThemeAccent(savedAccent);
+  }
+
+  setThemeMode(mode) {
+    this.state.theme.mode = mode;
+    if (mode === 'dark') {
+      document.documentElement.classList.add('dark');
+      this.dom.themeDarkIcon.className = 'fa-solid fa-sun text-sm text-amber-400';
+    } else {
+      document.documentElement.classList.remove('dark');
+      this.dom.themeDarkIcon.className = 'fa-solid fa-moon text-sm text-slate-600';
+    }
+    localStorage.setItem(APP_CONFIG.STORAGE_KEYS.THEME_MODE, mode);
+  }
+
+  setThemeAccent(accent) {
+    this.state.theme.accent = accent;
+    document.documentElement.setAttribute('data-accent', accent);
+    localStorage.setItem(APP_CONFIG.STORAGE_KEYS.THEME_ACCENT, accent);
   }
 
   populateCategorySelect() {
@@ -251,7 +293,7 @@ class SmartPackingApp {
       if (parseInt(chip.dataset.days, 10) === this.state.days) {
         chip.className = 'duration-chip px-2.5 py-1 bg-blue-600 text-white rounded-lg font-medium transition shadow-sm';
       } else {
-        chip.className = 'duration-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 rounded-lg text-slate-600 font-medium transition';
+        chip.className = 'duration-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-900/60 hover:text-blue-700 dark:hover:text-blue-300 rounded-lg text-slate-600 dark:text-slate-300 font-medium transition';
       }
     });
 
@@ -259,6 +301,36 @@ class SmartPackingApp {
   }
 
   bindEvents() {
+    // Theme Dark / Light toggle
+    this.dom.btnThemeDarkToggle.addEventListener('click', () => {
+      const nextMode = this.state.theme.mode === 'dark' ? 'light' : 'dark';
+      this.setThemeMode(nextMode);
+      this.showToast(nextMode === 'dark' ? 'เปิดโหมดมืด (Dark Mode)' : 'เปิดโหมดสว่าง (Light Mode)', 'info');
+    });
+
+    // Theme Palette dropdown toggle
+    this.dom.btnThemePalette.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.dom.paletteDropdown.classList.toggle('hidden');
+    });
+
+    // Close palette when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!this.dom.paletteDropdown.contains(e.target) && !this.dom.btnThemePalette.contains(e.target)) {
+        this.dom.paletteDropdown.classList.add('hidden');
+      }
+    });
+
+    // Theme Accent selection
+    this.dom.themeAccentOpts.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const accent = btn.dataset.accent;
+        this.setThemeAccent(accent);
+        this.dom.paletteDropdown.classList.add('hidden');
+        this.showToast(`เปลี่ยนโทนสีเป็น ${btn.textContent.trim()}`, 'success');
+      });
+    });
+
     // Baggage Preset Selector
     this.dom.selectBaggagePreset.addEventListener('change', (e) => {
       const selected = APP_CONFIG.BAGGAGE_PRESETS.find(p => p.id === e.target.value);
@@ -478,16 +550,16 @@ class SmartPackingApp {
 
     results.forEach(city => {
       const item = document.createElement('div');
-      item.className = 'px-4 py-2.5 hover:bg-blue-50 cursor-pointer flex items-center justify-between transition text-sm';
+      item.className = 'px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer flex items-center justify-between transition text-sm';
       item.innerHTML = `
         <div class="flex items-center space-x-2">
           <i class="fa-solid fa-location-dot text-rose-500 text-xs"></i>
           <div>
-            <span class="font-medium text-slate-800">${city.name}</span>
+            <span class="font-medium text-slate-800 dark:text-white">${city.name}</span>
             <span class="text-xs text-slate-400 ml-1">${city.admin1 ? `${city.admin1}, ` : ''}${city.country}</span>
           </div>
         </div>
-        <span class="text-[10px] font-semibold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">${city.countryCode}</span>
+        <span class="text-[10px] font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded">${city.countryCode}</span>
       `;
       item.addEventListener('click', () => {
         this.state.selectedCity = city;
@@ -759,23 +831,23 @@ class SmartPackingApp {
     if (totalWeightKg > limitKg) {
       const overKg = Math.round((totalWeightKg - limitKg) * 10) / 10;
       this.dom.weightBarFill.className = 'h-full rounded-full transition-all duration-500 bg-gradient-to-r from-rose-500 to-rose-600';
-      this.dom.weightCurrentKg.className = 'text-3xl font-black text-rose-600';
-      this.dom.weightRemainingBadge.className = 'inline-flex items-center justify-center text-xs font-bold text-rose-700 bg-rose-100 px-2.5 py-1 rounded-full mt-1';
+      this.dom.weightCurrentKg.className = 'text-3xl font-black text-rose-600 dark:text-rose-400';
+      this.dom.weightRemainingBadge.className = 'inline-flex items-center justify-center text-xs font-bold text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-950/70 px-2.5 py-1 rounded-full mt-1';
       this.dom.weightRemainingText.textContent = `น้ำหนักเกินโควตา ${overKg.toFixed(1)} kg!`;
       
       this.dom.weightOverweightDesc.textContent = `กระเป๋าของคุณหนักเกินโควตาไป ${overKg.toFixed(1)} kg แนะนำให้นำของชิ้นหนักออกหรือซื้อน้ำหนักกระเป๋าเพิ่มล่วงหน้า`;
       this.dom.weightOverweightAlert.classList.remove('hidden');
     } else {
-      this.dom.weightCurrentKg.className = 'text-3xl font-black text-slate-900';
+      this.dom.weightCurrentKg.className = 'text-3xl font-black text-slate-900 dark:text-white';
       this.dom.weightOverweightAlert.classList.add('hidden');
 
       if (percentage >= 80) {
         this.dom.weightBarFill.className = 'h-full rounded-full transition-all duration-500 bg-gradient-to-r from-amber-400 to-amber-500';
-        this.dom.weightRemainingBadge.className = 'inline-flex items-center justify-center text-xs font-bold text-amber-800 bg-amber-100 px-2.5 py-1 rounded-full mt-1';
+        this.dom.weightRemainingBadge.className = 'inline-flex items-center justify-center text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/70 px-2.5 py-1 rounded-full mt-1';
         this.dom.weightRemainingText.textContent = `ใกล้เต็ม: เหลือช้อปปิ้ง ${remainingKg.toFixed(1)} kg`;
       } else {
         this.dom.weightBarFill.className = 'h-full rounded-full transition-all duration-500 bg-gradient-to-r from-blue-500 to-indigo-600';
-        this.dom.weightRemainingBadge.className = 'inline-flex items-center justify-center text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full mt-1';
+        this.dom.weightRemainingBadge.className = 'inline-flex items-center justify-center text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 px-2.5 py-1 rounded-full mt-1';
         this.dom.weightRemainingText.textContent = `เหลือพื้นที่ช้อปปิ้ง ${remainingKg.toFixed(1)} kg`;
       }
     }
@@ -935,24 +1007,24 @@ class SmartPackingApp {
       renderedCategoriesCount++;
 
       const catCard = document.createElement('div');
-      catCard.className = 'category-container bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-3';
+      catCard.className = 'category-container bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 dark:border-slate-800 space-y-3';
       
       const catPackedCount = cat.items.filter(i => i.checked).length;
       const catTotalCount = cat.items.length;
 
       catCard.innerHTML = `
-        <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
           <div class="flex items-center space-x-2.5">
-            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-sm">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm">
               <i class="fa-solid ${cat.icon}"></i>
             </div>
             <div>
-              <h3 class="font-bold text-slate-800 text-sm sm:text-base">${cat.name}</h3>
+              <h3 class="font-bold text-slate-800 dark:text-white text-sm sm:text-base">${cat.name}</h3>
             </div>
           </div>
-          <span class="text-xs text-slate-400 font-medium">${catPackedCount}/${catTotalCount}</span>
+          <span class="text-xs text-slate-400 dark:text-slate-400 font-medium">${catPackedCount}/${catTotalCount}</span>
         </div>
-        <div class="divide-y divide-slate-100" id="cat-items-${cat.id}">
+        <div class="divide-y divide-slate-100 dark:divide-slate-800" id="cat-items-${cat.id}">
           <!-- Items injected below -->
         </div>
       `;
@@ -961,7 +1033,7 @@ class SmartPackingApp {
 
       cat.items.forEach(item => {
         const itemRow = document.createElement('div');
-        itemRow.className = `item-card flex items-center justify-between py-2.5 px-2 rounded-xl transition hover:bg-slate-50 ${item.checked ? 'checked' : ''}`;
+        itemRow.className = `item-card flex items-center justify-between py-2.5 px-2 rounded-xl transition hover:bg-slate-50 dark:hover:bg-slate-800/60 ${item.checked ? 'checked' : ''}`;
         
         const totalItemWeightGrams = (item.weightGrams || 150) * (item.quantity || 1);
         const totalItemWeightDisplay = totalItemWeightGrams >= 1000 
@@ -978,21 +1050,21 @@ class SmartPackingApp {
             >
             <div class="min-w-0">
               <div class="flex items-center space-x-2 flex-wrap">
-                <span class="item-name font-medium text-slate-800 text-sm truncate">${item.name}</span>
-                <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full shrink-0">
+                <span class="item-name font-medium text-slate-800 dark:text-slate-200 text-sm truncate">${item.name}</span>
+                <span class="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-full shrink-0">
                   ${item.quantity} ${item.unit || 'ชิ้น'}
                 </span>
-                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full shrink-0" title="น้ำหนักโดยประมาณ">
+                <span class="text-[11px] font-semibold text-slate-400 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full shrink-0" title="น้ำหนักโดยประมาณ">
                   <i class="fa-solid fa-weight-hanging text-[9px] mr-1 text-slate-400"></i>${totalItemWeightDisplay}
                 </span>
-                ${item.isEssential ? '<span class="text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded shrink-0">จำเป็น</span>' : ''}
+                ${item.isEssential ? '<span class="text-[10px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-1.5 py-0.5 rounded shrink-0">จำเป็น</span>' : ''}
               </div>
-              ${item.reason ? `<div class="text-[11px] text-slate-400 truncate mt-0.5"><i class="fa-solid fa-circle-info text-[9px] mr-1 text-slate-300"></i>${item.reason}</div>` : ''}
+              ${item.reason ? `<div class="text-[11px] text-slate-400 dark:text-slate-500 truncate mt-0.5"><i class="fa-solid fa-circle-info text-[9px] mr-1 text-slate-300 dark:text-slate-600"></i>${item.reason}</div>` : ''}
             </div>
           </div>
 
           <div class="flex items-center space-x-1 shrink-0 no-print">
-            <button class="btn-delete-item p-1.5 text-slate-300 hover:text-rose-500 rounded-lg transition" title="ลบรายการ" data-item-id="${item.id}">
+            <button class="btn-delete-item p-1.5 text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 rounded-lg transition" title="ลบรายการ" data-item-id="${item.id}">
               <i class="fa-regular fa-trash-can text-xs"></i>
             </button>
           </div>
@@ -1018,7 +1090,7 @@ class SmartPackingApp {
 
     if (renderedCategoriesCount === 0) {
       this.dom.categoriesContainer.innerHTML = `
-        <div class="bg-white rounded-2xl p-8 text-center border border-slate-200 text-slate-400 text-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-8 text-center border border-slate-200 dark:border-slate-800 text-slate-400 text-sm">
           <i class="fa-regular fa-circle-check text-2xl text-emerald-400 mb-2"></i>
           <p>ไม่มีรายการที่ตรงกับตัวกรองนี้</p>
         </div>
@@ -1078,19 +1150,19 @@ class SmartPackingApp {
     // Visual color shift when 100%
     if (percent === 100 && total > 0) {
       this.dom.progressBarFill.className = 'progress-bar-fill bg-gradient-to-r from-emerald-400 to-emerald-600 h-full rounded-full';
-      this.dom.progressPercent.className = 'text-2xl font-black text-emerald-600';
+      this.dom.progressPercent.className = 'text-2xl font-black text-emerald-600 dark:text-emerald-400';
     } else {
-      this.dom.progressBarFill.className = 'progress-bar-fill bg-gradient-to-r from-blue-500 to-indigo-600 h-full rounded-full';
-      this.dom.progressPercent.className = 'text-2xl font-black text-blue-600';
+      this.dom.progressBarFill.className = 'progress-bar-fill theme-btn-gradient h-full rounded-full';
+      this.dom.progressPercent.className = 'text-2xl font-black text-blue-600 dark:text-blue-400';
     }
   }
 
   updateFilterTabsUI() {
     this.dom.filterTabs.forEach(tab => {
       if (tab.dataset.filter === this.state.filter) {
-        tab.className = 'filter-tab px-3 py-1.5 rounded-lg transition bg-white text-slate-900 shadow-sm font-semibold';
+        tab.className = 'filter-tab px-3 py-1.5 rounded-lg transition bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm font-semibold';
       } else {
-        tab.className = 'filter-tab px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900 font-medium';
+        tab.className = 'filter-tab px-3 py-1.5 rounded-lg transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium';
       }
     });
   }
@@ -1268,7 +1340,7 @@ class SmartPackingApp {
     } else {
       savedTrips.forEach(trip => {
         const item = document.createElement('div');
-        item.className = 'p-3.5 bg-slate-50 hover:bg-blue-50/60 border border-slate-200 rounded-xl flex items-center justify-between transition group';
+        item.className = 'p-3.5 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50/60 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-between transition group';
         
         const packed = trip.items ? trip.items.filter(i => i.checked).length : 0;
         const total = trip.items ? trip.items.length : 0;
@@ -1279,14 +1351,14 @@ class SmartPackingApp {
 
         item.innerHTML = `
           <div class="cursor-pointer flex-grow pr-3" data-trip-id="${trip.id}">
-            <div class="font-bold text-slate-800 text-sm group-hover:text-blue-600 transition flex items-center gap-1.5">
+            <div class="font-bold text-slate-800 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition flex items-center gap-1.5">
               <i class="fa-solid fa-map-pin text-rose-500 text-xs"></i>
               <span>${trip.title}</span>
             </div>
-            <div class="text-xs text-slate-400 mt-0.5 flex items-center gap-2 flex-wrap">
+            <div class="text-xs text-slate-400 dark:text-slate-400 mt-0.5 flex items-center gap-2 flex-wrap">
               <span>📅 ${dateRangeInfo}</span>
               <span>•</span>
-              <span class="text-blue-600 font-medium">เก็บแล้ว ${packed}/${total} ชิ้น${weightInfo}${budgetInfo}</span>
+              <span class="text-blue-600 dark:text-blue-400 font-medium">เก็บแล้ว ${packed}/${total} ชิ้น${weightInfo}${budgetInfo}</span>
             </div>
           </div>
           <div class="flex items-center space-x-1 shrink-0">
@@ -1332,7 +1404,8 @@ class SmartPackingApp {
       baggage: this.state.baggage,
       budget: this.state.budget
     };
-    const text = StorageService.generateTextExport(tripData);
+    let text = StorageService.generateTextExport(tripData);
+    text += `\n✨ Created By Panusbodee (https://github.com/panusbodee-owen)\n`;
 
     if (!text) {
       this.showToast('ไม่มีรายการสิ่งของสำหรับส่งออก', 'error');
@@ -1358,6 +1431,7 @@ class SmartPackingApp {
       items: this.state.items,
       baggage: this.state.baggage,
       budget: this.state.budget,
+      createdBy: 'Panusbodee (panusbodee-owen)',
       exportedAt: new Date().toISOString()
     };
 
@@ -1380,7 +1454,7 @@ class SmartPackingApp {
     const bgColors = {
       success: 'bg-emerald-600 text-white shadow-emerald-500/20',
       error: 'bg-rose-600 text-white shadow-rose-500/20',
-      info: 'bg-slate-900 text-white shadow-slate-900/20'
+      info: 'bg-slate-900 dark:bg-slate-800 text-white shadow-slate-900/20 border border-slate-700/50'
     };
 
     const icons = {
