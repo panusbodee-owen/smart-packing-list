@@ -67,6 +67,7 @@ export class StorageService {
         endDate: tripData.endDate,
         weather: tripData.weather,
         items: tripData.items,
+        baggage: tripData.baggage || null,
         savedAt: new Date().toISOString()
       };
 
@@ -120,7 +121,7 @@ export class StorageService {
   static generateTextExport(tripData) {
     if (!tripData || !tripData.items) return '';
 
-    const { destination, days, startDate, endDate, weather, items } = tripData;
+    const { destination, days, startDate, endDate, weather, items, baggage } = tripData;
     const destName = destination ? `${destination.name}, ${destination.country}` : 'ทริปเดินทาง';
     const minT = weather?.summary?.minTemp ?? '-';
     const maxT = weather?.summary?.maxTemp ?? '-';
@@ -129,6 +130,11 @@ export class StorageService {
     let text = `✈️ Smart Packing List: ${destName}\n`;
     text += `📅 ช่วงวันเดินทาง: ${dateText}\n`;
     text += `🌡️ อุณหภูมิ: ${minT}°C ถึง ${maxT}°C | โอกาสฝนสูงสุด: ${weather?.summary?.maxRainProb ?? 0}%\n`;
+    
+    if (baggage && baggage.totalKg !== undefined) {
+      text += `⚖️ น้ำหนักกระเป๋าโดยประมาณ: ${baggage.totalKg} kg (โควตา ${baggage.limitKg} kg | เหลือพื้นที่ช้อปปิ้ง ${baggage.remainingKg} kg)\n`;
+    }
+
     text += `----------------------------------------\n\n`;
 
     // Group items by category
@@ -153,7 +159,8 @@ export class StorageService {
         text += `📁 ${group.name}\n`;
         group.items.forEach(item => {
           const checkMark = item.checked ? '[x]' : '[ ]';
-          text += `  ${checkMark} ${item.name} (${item.quantity} ${item.unit || 'ชิ้น'})${item.reason ? ` - ${item.reason}` : ''}\n`;
+          const weightStr = item.weightGrams ? ` [~${item.weightGrams * (item.quantity || 1)}g]` : '';
+          text += `  ${checkMark} ${item.name} (${item.quantity} ${item.unit || 'ชิ้น'})${weightStr}${item.reason ? ` - ${item.reason}` : ''}\n`;
         });
         text += `\n`;
       }
@@ -162,7 +169,7 @@ export class StorageService {
     const packedCount = items.filter(i => i.checked).length;
     const percent = Math.round((packedCount / items.length) * 100) || 0;
     text += `📊 สถานะ: จัดแล้ว ${packedCount}/${items.length} รายการ (${percent}%)\n`;
-    text += `สร้างโดย Smart Packing List (Weather-based Auto Packing)\n`;
+    text += `สร้างโดย Smart Packing List (Weather-based Auto Packing & Luggage Scale)\n`;
 
     return text;
   }

@@ -1,6 +1,21 @@
-import { CATEGORIES } from './config.js';
+import { CATEGORIES, ITEM_WEIGHT_ESTIMATES } from './config.js';
 
 export class PackingEngine {
+  /**
+   * Helper to estimate single unit weight in grams based on item name
+   * @param {string} name 
+   * @returns {number} Weight in grams
+   */
+  static estimateWeightGrams(name) {
+    if (!name) return ITEM_WEIGHT_ESTIMATES.default;
+    for (const [keyword, weight] of Object.entries(ITEM_WEIGHT_ESTIMATES)) {
+      if (keyword !== 'default' && name.includes(keyword)) {
+        return weight;
+      }
+    }
+    return ITEM_WEIGHT_ESTIMATES.default;
+  }
+
   /**
    * Generate smart packing list based on weather forecast and trip duration
    * @param {Object} weather 
@@ -20,17 +35,21 @@ export class PackingEngine {
     const hasSnow = summary.hasSnow;
 
     let itemIdCounter = 1;
-    const makeItem = (name, quantity, unit, categoryId, reason, isEssential = false) => ({
-      id: `item_${Date.now()}_${itemIdCounter++}`,
-      name,
-      quantity,
-      unit,
-      category: categoryId,
-      checked: false,
-      reason,
-      isEssential,
-      custom: false
-    });
+    const makeItem = (name, quantity, unit, categoryId, reason, isEssential = false, explicitWeightGrams = null) => {
+      const unitWeight = explicitWeightGrams || this.estimateWeightGrams(name);
+      return {
+        id: `item_${Date.now()}_${itemIdCounter++}`,
+        name,
+        quantity,
+        unit,
+        category: categoryId,
+        checked: false,
+        reason,
+        isEssential,
+        custom: false,
+        weightGrams: unitWeight
+      };
+    };
 
     // 1. เอกสาร & การเงิน (Universal Essentials)
     const isDomestic = destination.country && (destination.country.toLowerCase() === 'thailand' || destination.country.toLowerCase() === 'ไทย');
@@ -41,7 +60,8 @@ export class PackingEngine {
       'เล่ม/ใบ',
       CATEGORIES.DOCUMENTS.id,
       'เอกสารแสดงตนในการเดินทาง',
-      true
+      true,
+      50
     ));
 
     items.push(makeItem(
@@ -50,7 +70,8 @@ export class PackingEngine {
       'ชุด',
       CATEGORIES.DOCUMENTS.id,
       'พิมพ์สำเนาหรือบันทึก Offline ในมือถือ',
-      true
+      true,
+      30
     ));
 
     items.push(makeItem(
@@ -59,7 +80,8 @@ export class PackingEngine {
       'ชุด',
       CATEGORIES.DOCUMENTS.id,
       'ค่าใช้จ่ายตลอดทริป',
-      true
+      true,
+      60
     ));
 
     if (!isDomestic) {
@@ -69,7 +91,8 @@ export class PackingEngine {
         'ฉบับ',
         CATEGORIES.DOCUMENTS.id,
         'คุ้มครองอุบัติเหตุและเจ็บป่วยต่างแดน',
-        true
+        true,
+        30
       ));
     }
 
@@ -80,7 +103,9 @@ export class PackingEngine {
       topsCount,
       'ตัว',
       CATEGORIES.CLOTHING.id,
-      days > 7 ? `คำนวณ ${topsCount} ตัว (แนะนำซักระหว่างทริป)` : `เตรียมสำหรับ ${days} วัน`
+      days > 7 ? `คำนวณ ${topsCount} ตัว (แนะนำซักระหว่างทริป)` : `เตรียมสำหรับ ${days} วัน`,
+      false,
+      180
     ));
 
     const bottomsCount = Math.max(1, Math.min(Math.ceil(days / 2), 4));
@@ -89,7 +114,9 @@ export class PackingEngine {
       bottomsCount,
       'ตัว',
       CATEGORIES.CLOTHING.id,
-      `ใส่สลับสำหรับ ${days} วัน`
+      `ใส่สลับสำหรับ ${days} วัน`,
+      false,
+      450
     ));
 
     items.push(makeItem(
@@ -97,7 +124,9 @@ export class PackingEngine {
       days + 1,
       'ชุด',
       CATEGORIES.CLOTHING.id,
-      `คำนวณ ${days} วัน + สำรอง 1 วัน`
+      `คำนวณ ${days} วัน + สำรอง 1 วัน`,
+      false,
+      50
     ));
 
     items.push(makeItem(
@@ -105,7 +134,9 @@ export class PackingEngine {
       days + 1,
       'คู่',
       CATEGORIES.CLOTHING.id,
-      isCold ? 'เน้นเก็บความอบอุ่นที่เท้า' : `คำนวณ ${days} วัน + สำรอง 1 วัน`
+      isCold ? 'เน้นเก็บความอบอุ่นที่เท้า' : `คำนวณ ${days} วัน + สำรอง 1 วัน`,
+      false,
+      50
     ));
 
     const sleepwearCount = Math.max(1, Math.min(Math.ceil(days / 3), 3));
@@ -114,7 +145,9 @@ export class PackingEngine {
       sleepwearCount,
       'ชุด',
       CATEGORIES.CLOTHING.id,
-      `เปลี่ยนทุก 2-3 คืน`
+      `เปลี่ยนทุก 2-3 คืน`,
+      false,
+      300
     ));
 
     items.push(makeItem(
@@ -122,7 +155,9 @@ export class PackingEngine {
       1,
       'คู่',
       CATEGORIES.CLOTHING.id,
-      'สำหรับการเดินท่องเที่ยวระยะไกล'
+      'สำหรับการเดินท่องเที่ยวระยะไกล',
+      false,
+      700
     ));
 
     // เสื้อผ้าตามสภาพอากาศหนาว/หิมะ
@@ -132,28 +167,36 @@ export class PackingEngine {
         1,
         'ตัว',
         CATEGORIES.CLOTHING.id,
-        `อุณหภูมิต่ำสุด ${minTemp}°C (อากาศหนาวจัด)`
+        `อุณหภูมิต่ำสุด ${minTemp}°C (อากาศหนาวจัด)`,
+        false,
+        1200
       ));
       items.push(makeItem(
         'ชุดชั้นในเก็บความร้อน (Heattech Ultra Warm / ลองจอน)',
         Math.min(days, 4),
         'ชุด',
         CATEGORIES.CLOTHING.id,
-        `รักษาอุณหภูมิร่างกายในสภาพอากาศ ${minTemp}°C`
+        `รักษาอุณหภูมิร่างกายในสภาพอากาศ ${minTemp}°C`,
+        false,
+        150
       ));
       items.push(makeItem(
         'กางเกงกันลม / กางเกงบุฟรีซด้านใน',
         Math.min(bottomsCount, 3),
         'ตัว',
         CATEGORIES.CLOTHING.id,
-        'กันลมหนาวและเกล็ดหิมะ'
+        'กันลมหนาวและเกล็ดหิมะ',
+        false,
+        450
       ));
       items.push(makeItem(
         'รองเท้าบูทกันลื่นลุยหิมะ (Snow Boots / Waterproof)',
         1,
         'คู่',
         CATEGORIES.CLOTHING.id,
-        'พื้นรองเท้ายึดเกาะดี ป้องกันการลื่นล้มบนน้ำแข็ง'
+        'พื้นรองเท้ายึดเกาะดี ป้องกันการลื่นล้มบนน้ำแข็ง',
+        false,
+        1100
       ));
     } else if (isCold) {
       items.push(makeItem(
@@ -161,14 +204,18 @@ export class PackingEngine {
         Math.min(Math.ceil(days / 3), 3),
         'ตัว',
         CATEGORIES.CLOTHING.id,
-        `อุณหภูมิต่ำสุด ${minTemp}°C (อากาศค่อนข้างเย็น)`
+        `อุณหภูมิต่ำสุด ${minTemp}°C (อากาศค่อนข้างเย็น)`,
+        false,
+        500
       ));
       items.push(makeItem(
         'เสื้อยืดแขนยาว / Heattech บาง',
         Math.min(days, 3),
         'ตัว',
         CATEGORIES.CLOTHING.id,
-        'สำหรับสวมใส่เป็นเสื้อชั้นใน'
+        'สำหรับสวมใส่เป็นเสื้อชั้นใน',
+        false,
+        160
       ));
     }
 
@@ -180,21 +227,26 @@ export class PackingEngine {
         'คัน',
         CATEGORIES.WEATHER_GEAR.id,
         `พยากรณ์มีโอกาสฝนตกสูงสุด ${summary.maxRainProb}%`,
-        true
+        true,
+        220
       ));
       items.push(makeItem(
         'เสื้อกันฝนพกพา (Raincoat)',
         1,
         'ตัว',
         CATEGORIES.WEATHER_GEAR.id,
-        'คล่องตัวเวลาฝนตกขณะเดินทาง'
+        'คล่องตัวเวลาฝนตกขณะเดินทาง',
+        false,
+        180
       ));
       items.push(makeItem(
         'ซองหรือถุงซิปล็อคกันน้ำใส่อุปกรณ์อิเล็กทรอนิกส์',
         2,
         'ใบ',
         CATEGORIES.WEATHER_GEAR.id,
-        'ปกป้องพาสปอร์ตและมือถือยามฝนตก'
+        'ปกป้องพาสปอร์ตและมือถือยามฝนตก',
+        false,
+        40
       ));
     }
 
@@ -204,14 +256,18 @@ export class PackingEngine {
         1,
         'คู่',
         CATEGORIES.WEATHER_GEAR.id,
-        `ป้องกันมือชาจากความเย็น ${minTemp}°C`
+        `ป้องกันมือชาจากความเย็น ${minTemp}°C`,
+        false,
+        90
       ));
       items.push(makeItem(
         'ผ้าพันคอ & หมวกไหมพรม (Beanie)',
         1,
         'ชุด',
         CATEGORIES.WEATHER_GEAR.id,
-        'รักษาความอบอุ่นช่วงคอและศีรษะ'
+        'รักษาความอบอุ่นช่วงคอและศีรษะ',
+        false,
+        220
       ));
       if (isFreezing || hasSnow) {
         items.push(makeItem(
@@ -219,7 +275,9 @@ export class PackingEngine {
           Math.min(days * 2, 10),
           'แผ่น',
           CATEGORIES.WEATHER_GEAR.id,
-          'ใส่ในกระเป๋าเสื้อโค้ทช่วยให้อุ่นขึ้น'
+          'ใส่ในกระเป๋าเสื้อโค้ทช่วยให้อุ่นขึ้น',
+          false,
+          45
         ));
       }
     }
@@ -230,28 +288,36 @@ export class PackingEngine {
         1,
         'อัน',
         CATEGORIES.WEATHER_GEAR.id,
-        `อุณหภูมิสูงสุด ${maxTemp}°C แดดแรง`
+        `อุณหภูมิสูงสุด ${maxTemp}°C แดดแรง`,
+        false,
+        40
       ));
       items.push(makeItem(
         'หมวกปีกกว้าง / หมวกแก๊ป',
         1,
         'ใบ',
         CATEGORIES.WEATHER_GEAR.id,
-        'ป้องกันแสงแดดระหว่างวัน'
+        'ป้องกันแสงแดดระหว่างวัน',
+        false,
+        100
       ));
       items.push(makeItem(
         'พัดลมพกพา หรือ สเปรย์เย็นคลายร้อน',
         1,
         'เครื่อง',
         CATEGORIES.WEATHER_GEAR.id,
-        'ช่วยคลายร้อนระหว่างเดินกลางแจ้ง'
+        'ช่วยคลายร้อนระหว่างเดินกลางแจ้ง',
+        false,
+        180
       ));
       items.push(makeItem(
         'สเปรย์หรือโลชั่นกันยุง',
         1,
         'ขวด',
         CATEGORIES.WEATHER_GEAR.id,
-        'ป้องกันยุงในสภาพอากาศร้อนชื้น'
+        'ป้องกันยุงในสภาพอากาศร้อนชื้น',
+        false,
+        120
       ));
     }
 
@@ -262,7 +328,8 @@ export class PackingEngine {
       'ชุด',
       CATEGORIES.ELECTRONICS.id,
       'อุปกรณ์หลักในการสื่อสารและการนำทาง',
-      true
+      true,
+      250
     ));
 
     items.push(makeItem(
@@ -271,7 +338,8 @@ export class PackingEngine {
       'ก้อน',
       CATEGORIES.ELECTRONICS.id,
       'สำรองแบตเตอรี่ตลอดวัน (ต้องถือขึ้นเครื่อง)',
-      true
+      true,
+      280
     ));
 
     if (!isDomestic) {
@@ -281,7 +349,8 @@ export class PackingEngine {
         'ตัว',
         CATEGORIES.ELECTRONICS.id,
         'สำหรับเต้ารับไฟฟ้าต่างประเทศ',
-        true
+        true,
+        140
       ));
       items.push(makeItem(
         'eSIM / Travel SIM สำหรับใช้งานอินเทอร์เน็ต',
@@ -289,7 +358,8 @@ export class PackingEngine {
         'ซิม/แพ็กเกจ',
         CATEGORIES.ELECTRONICS.id,
         'เช็กแผนที่และติดต่อสื่อสาร',
-        true
+        true,
+        20
       ));
     }
 
@@ -298,7 +368,9 @@ export class PackingEngine {
       1,
       'ชุด',
       CATEGORIES.ELECTRONICS.id,
-      'ฟังเพลงบนเครื่องบินและการเดินทาง'
+      'ฟังเพลงบนเครื่องบินและการเดินทาง',
+      false,
+      150
     ));
 
     // 5. ของใช้ส่วนตัว & สุขภาพ (Toiletries & Health)
@@ -308,7 +380,8 @@ export class PackingEngine {
       'ชุด',
       CATEGORIES.TOILETRIES.id,
       'สุขอนามัยส่วนตัว (ขนาดต่ำกว่า 100ml)',
-      true
+      true,
+      80
     ));
 
     items.push(makeItem(
@@ -316,7 +389,9 @@ export class PackingEngine {
       1,
       'หลอด',
       CATEGORIES.TOILETRIES.id,
-      'ปกป้องผิวจากรังสียูวีทุกฤดูกาล'
+      'ปกป้องผิวจากรังสียูวีทุกฤดูกาล',
+      false,
+      120
     ));
 
     if (isCold || isFreezing) {
@@ -325,7 +400,9 @@ export class PackingEngine {
         1,
         'ตลับ/หลอด',
         CATEGORIES.TOILETRIES.id,
-        'ป้องกันผิวแตกลอกและริมฝีปากแห้งจากลมหนาว'
+        'ป้องกันผิวแตกลอกและริมฝีปากแห้งจากลมหนาว',
+        false,
+        80
       ));
     }
 
@@ -335,7 +412,8 @@ export class PackingEngine {
       'ชุด',
       CATEGORIES.TOILETRIES.id,
       'พกพาในกระเป๋าติดตัวขึ้นเครื่อง',
-      true
+      true,
+      100
     ));
 
     items.push(makeItem(
@@ -343,7 +421,9 @@ export class PackingEngine {
       1,
       'ชุด',
       CATEGORIES.TOILETRIES.id,
-      'ปฐมพยาบาลเบื้องต้นยามเจ็บป่วยกะทันหัน'
+      'ปฐมพยาบาลเบื้องต้นยามเจ็บป่วยกะทันหัน',
+      false,
+      150
     ));
 
     items.push(makeItem(
@@ -351,7 +431,9 @@ export class PackingEngine {
       1,
       'ชุด',
       CATEGORIES.TOILETRIES.id,
-      'รักษาแผลรองเท้ากัดและสุขอนามัย'
+      'รักษาแผลรองเท้ากัดและสุขอนามัย',
+      false,
+      120
     ));
 
     return items;

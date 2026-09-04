@@ -18,6 +18,13 @@ export const APP_CONFIG = {
     { name: 'Reykjavik', country: 'Iceland', query: 'Reykjavik' },
     { name: 'Bangkok', country: 'Thailand', query: 'Bangkok' },
     { name: 'Sapporo', country: 'Japan', query: 'Sapporo' }
+  ],
+  BAGGAGE_PRESETS: [
+    { id: 'carry_on_7', name: 'ถือขึ้นเครื่อง (Carry-on 7 kg)', limitKg: 7, emptyBagKg: 2.2, icon: 'fa-suitcase' },
+    { id: 'checked_15', name: 'โหลดใต้เครื่อง 15 kg', limitKg: 15, emptyBagKg: 3.5, icon: 'fa-boxes-packing' },
+    { id: 'checked_20', name: 'โหลดใต้เครื่อง 20 kg (มาตรฐาน)', limitKg: 20, emptyBagKg: 3.8, icon: 'fa-suitcase-rolling' },
+    { id: 'checked_23', name: 'โหลดใต้เครื่อง 23 kg (ไฟลต์อินเตอร์)', limitKg: 23, emptyBagKg: 4.0, icon: 'fa-plane' },
+    { id: 'checked_30', name: 'โหลดใต้เครื่อง 30 kg (ฟูลเซอร์วิส)', limitKg: 30, emptyBagKg: 4.5, icon: 'fa-weight-hanging' }
   ]
 };
 
@@ -58,6 +65,48 @@ export const CATEGORIES = {
     icon: 'fa-list-check',
     color: 'rose'
   }
+};
+
+// Default weight estimates for items (in grams)
+export const ITEM_WEIGHT_ESTIMATES = {
+  'เสื้อยืด': 180,
+  'เสื้อผ้า': 180,
+  'เสื้อลำลอง': 200,
+  'กางเกงยีนส์': 600,
+  'กางเกงขายาว': 450,
+  'กางเกงขาสั้น': 220,
+  'ชุดชั้นใน': 50,
+  'ถุงเท้า': 40,
+  'ชุดนอน': 300,
+  'รองเท้าผ้าใบ': 700,
+  'เสื้อแจ็คเก็ตขนเป็ด': 1100,
+  'ดาวน์โค้ท': 1200,
+  'Heattech': 140,
+  'ลองจอน': 180,
+  'กางเกงกันลม': 400,
+  'รองเท้าบูท': 1100,
+  'เสื้อสเวตเตอร์': 450,
+  'เสื้อกันหนาว': 500,
+  'ร่ม': 220,
+  'เสื้อกันฝน': 180,
+  'ถุงมือ': 80,
+  'ผ้าพันคอ': 150,
+  'หมวกไหมพรม': 90,
+  'แผ่นแปะความร้อน': 45,
+  'แว่นตากันแดด': 40,
+  'หมวก': 100,
+  'พัดลมพกพา': 180,
+  'สเปรย์': 120,
+  'สมาร์ทโฟน': 200,
+  'พาวเวอร์แบงก์': 280,
+  'หัวแปลงปลั๊ก': 120,
+  'หูฟัง': 150,
+  'แปรงสีฟัน': 80,
+  'ครีม': 100,
+  'ลิปบาล์ม': 30,
+  'ยา': 150,
+  'พาสปอร์ต': 50,
+  'default': 150
 };
 
 // WMO Weather interpretation codes (WW)

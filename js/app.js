@@ -18,7 +18,13 @@ class SmartPackingApp {
       weather: null,
       items: [],
       filter: 'all',
-      isLoading: false
+      isLoading: false,
+      baggage: {
+        presetId: 'checked_20',
+        limitKg: 20,
+        emptyBagKg: 3.8,
+        packedOnly: false
+      }
     };
 
     this.debounceTimer = null;
@@ -42,7 +48,22 @@ class SmartPackingApp {
       // Sections
       emptyState: document.getElementById('empty-state'),
       weatherSection: document.getElementById('weather-section'),
+      weightSection: document.getElementById('weight-section'),
       checklistSection: document.getElementById('checklist-section'),
+
+      // Luggage Scale Elements
+      selectBaggagePreset: document.getElementById('select-baggage-preset'),
+      weightCurrentKg: document.getElementById('weight-current-kg'),
+      weightLimitKg: document.getElementById('weight-limit-kg'),
+      weightRemainingBadge: document.getElementById('weight-remaining-badge'),
+      weightRemainingText: document.getElementById('weight-remaining-text'),
+      weightPercentageText: document.getElementById('weight-percentage-text'),
+      weightBarFill: document.getElementById('weight-bar-fill'),
+      weightEmptyBagText: document.getElementById('weight-empty-bag-text'),
+      weightItemsText: document.getElementById('weight-items-text'),
+      checkWeightPackedOnly: document.getElementById('check-weight-packed-only'),
+      weightOverweightAlert: document.getElementById('weight-overweight-alert'),
+      weightOverweightDesc: document.getElementById('weight-overweight-desc'),
 
       // Weather elements
       weatherCityTitle: document.getElementById('weather-city-title'),
@@ -80,6 +101,7 @@ class SmartPackingApp {
       addItemName: document.getElementById('add-item-name'),
       addItemQty: document.getElementById('add-item-qty'),
       addItemUnit: document.getElementById('add-item-unit'),
+      addItemWeight: document.getElementById('add-item-weight'),
       addItemCategory: document.getElementById('add-item-category'),
       addItemReason: document.getElementById('add-item-reason'),
       btnOpenAddModal: document.getElementById('btn-add-item-modal'),
@@ -124,6 +146,7 @@ class SmartPackingApp {
 
   init() {
     this.populateCategorySelect();
+    this.populateBaggagePresets();
     this.setupDateInputs();
     this.bindEvents();
     this.updateSavedTripsBadge();
@@ -136,8 +159,30 @@ class SmartPackingApp {
     }
   }
 
+  populateCategorySelect() {
+    this.dom.addItemCategory.innerHTML = '';
+    Object.values(CATEGORIES).forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat.id;
+      opt.textContent = cat.name;
+      this.dom.addItemCategory.appendChild(opt);
+    });
+  }
+
+  populateBaggagePresets() {
+    this.dom.selectBaggagePreset.innerHTML = '';
+    APP_CONFIG.BAGGAGE_PRESETS.forEach(preset => {
+      const opt = document.createElement('option');
+      opt.value = preset.id;
+      opt.textContent = preset.name;
+      if (preset.id === this.state.baggage.presetId) {
+        opt.selected = true;
+      }
+      this.dom.selectBaggagePreset.appendChild(opt);
+    });
+  }
+
   setupDateInputs() {
-    // Set initial values
     this.dom.inputStartDate.value = this.state.startDate;
     this.dom.inputEndDate.value = this.state.endDate;
     this.dom.inputStartDate.min = this.formatDateYMD(new Date());
@@ -171,17 +216,26 @@ class SmartPackingApp {
     });
   }
 
-  populateCategorySelect() {
-    this.dom.addItemCategory.innerHTML = '';
-    Object.values(CATEGORIES).forEach(cat => {
-      const opt = document.createElement('option');
-      opt.value = cat.id;
-      opt.textContent = cat.name;
-      this.dom.addItemCategory.appendChild(opt);
-    });
-  }
-
   bindEvents() {
+    // Baggage Preset Selector
+    this.dom.selectBaggagePreset.addEventListener('change', (e) => {
+      const selected = APP_CONFIG.BAGGAGE_PRESETS.find(p => p.id === e.target.value);
+      if (selected) {
+        this.state.baggage.presetId = selected.id;
+        this.state.baggage.limitKg = selected.limitKg;
+        this.state.baggage.emptyBagKg = selected.emptyBagKg;
+        this.updateLuggageWeight();
+        this.persistCurrentTrip();
+      }
+    });
+
+    // Packed Only checkbox for weight
+    this.dom.checkWeightPackedOnly.addEventListener('change', (e) => {
+      this.state.baggage.packedOnly = e.target.checked;
+      this.updateLuggageWeight();
+      this.persistCurrentTrip();
+    });
+
     // Date changes
     this.dom.inputStartDate.addEventListener('change', () => {
       const start = new Date(this.dom.inputStartDate.value);
@@ -438,6 +492,9 @@ class SmartPackingApp {
       );
       this.state.items = recommendedItems;
 
+      // Update luggage weight
+      this.updateLuggageWeight();
+
       // Save to LocalStorage
       this.persistCurrentTrip();
 
@@ -449,6 +506,7 @@ class SmartPackingApp {
       // Show sections
       this.dom.emptyState.classList.add('hidden');
       this.dom.weatherSection.classList.remove('hidden');
+      this.dom.weightSection.classList.remove('hidden');
       this.dom.checklistSection.classList.remove('hidden');
 
       this.showToast(`สร้างรายการสำเร็จสำหรับ ${this.state.selectedCity.name}!`, 'success');
@@ -461,6 +519,67 @@ class SmartPackingApp {
       this.showToast(error.message || 'เกิดข้อผิดพลาดในการดึงข้อมูลสภาพอากาศ', 'error');
     } finally {
       this.setButtonLoading(false);
+    }
+  }
+
+  updateLuggageWeight() {
+    const { items, baggage } = this.state;
+    if (!items) return;
+
+    // Filter items based on calculation mode
+    const itemsToCount = baggage.packedOnly ? items.filter(i => i.checked) : items;
+    
+    // Sum total weight in grams
+    let itemsGrams = 0;
+    itemsToCount.forEach(item => {
+      const weight = item.weightGrams || 150;
+      const qty = item.quantity || 1;
+      itemsGrams += weight * qty;
+    });
+
+    const itemsKg = Math.round(itemsGrams / 100) / 10;
+    const emptyBagKg = baggage.emptyBagKg || 3.8;
+    const limitKg = baggage.limitKg || 20.0;
+    const totalWeightKg = Math.round((emptyBagKg + itemsKg) * 10) / 10;
+    const remainingKg = Math.round((limitKg - totalWeightKg) * 10) / 10;
+    const percentage = Math.round((totalWeightKg / limitKg) * 100);
+
+    // Save summary into state baggage object
+    this.state.baggage.totalKg = totalWeightKg;
+    this.state.baggage.remainingKg = remainingKg;
+    this.state.baggage.itemsKg = itemsKg;
+
+    // Update UI DOM
+    this.dom.weightCurrentKg.textContent = totalWeightKg.toFixed(1);
+    this.dom.weightLimitKg.textContent = limitKg.toFixed(1);
+    this.dom.weightEmptyBagText.textContent = `${emptyBagKg.toFixed(1)} kg`;
+    this.dom.weightItemsText.textContent = `${itemsKg.toFixed(1)} kg`;
+    this.dom.weightPercentageText.textContent = `${percentage}%`;
+    this.dom.weightBarFill.style.width = `${Math.min(percentage, 100)}%`;
+
+    // Overweight or Safe logic
+    if (totalWeightKg > limitKg) {
+      const overKg = Math.round((totalWeightKg - limitKg) * 10) / 10;
+      this.dom.weightBarFill.className = 'h-full rounded-full transition-all duration-500 bg-gradient-to-r from-rose-500 to-rose-600';
+      this.dom.weightCurrentKg.className = 'text-3xl font-black text-rose-600';
+      this.dom.weightRemainingBadge.className = 'inline-flex items-center justify-center text-xs font-bold text-rose-700 bg-rose-100 px-2.5 py-1 rounded-full mt-1';
+      this.dom.weightRemainingText.textContent = `น้ำหนักเกินโควตา ${overKg.toFixed(1)} kg!`;
+      
+      this.dom.weightOverweightDesc.textContent = `กระเป๋าของคุณหนักเกินโควตาไป ${overKg.toFixed(1)} kg แนะนำให้นำของชิ้นหนักออกหรือซื้อน้ำหนักกระเป๋าเพิ่มล่วงหน้า`;
+      this.dom.weightOverweightAlert.classList.remove('hidden');
+    } else {
+      this.dom.weightCurrentKg.className = 'text-3xl font-black text-slate-900';
+      this.dom.weightOverweightAlert.classList.add('hidden');
+
+      if (percentage >= 80) {
+        this.dom.weightBarFill.className = 'h-full rounded-full transition-all duration-500 bg-gradient-to-r from-amber-400 to-amber-500';
+        this.dom.weightRemainingBadge.className = 'inline-flex items-center justify-center text-xs font-bold text-amber-800 bg-amber-100 px-2.5 py-1 rounded-full mt-1';
+        this.dom.weightRemainingText.textContent = `ใกล้เต็ม: เหลือช้อปปิ้ง ${remainingKg.toFixed(1)} kg`;
+      } else {
+        this.dom.weightBarFill.className = 'h-full rounded-full transition-all duration-500 bg-gradient-to-r from-blue-500 to-indigo-600';
+        this.dom.weightRemainingBadge.className = 'inline-flex items-center justify-center text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full mt-1';
+        this.dom.weightRemainingText.textContent = `เหลือพื้นที่ช้อปปิ้ง ${remainingKg.toFixed(1)} kg`;
+      }
     }
   }
 
@@ -486,7 +605,7 @@ class SmartPackingApp {
 
     // Print metadata
     this.dom.printTitle.textContent = `ใบจัดกระเป๋า: ${selectedCity.name}, ${selectedCity.country}`;
-    this.dom.printSubtitle.textContent = `ช่วงวัน: ${rangeText} | พยากรณ์อากาศ: ต่ำสุด ${summary.minTemp}°C / สูงสุด ${summary.maxTemp}°C | โอกาสฝน ${summary.maxRainProb}%`;
+    this.dom.printSubtitle.textContent = `ช่วงวัน: ${rangeText} | พยากรณ์อากาศ: ต่ำสุด ${summary.minTemp}°C / สูงสุด ${summary.maxTemp}°C | โอกาสฝน ${summary.maxRainProb}% | น้ำหนักกระเป๋า: ${this.state.baggage.totalKg || 0} kg`;
 
     // Summary Badges
     this.dom.weatherSummaryBadges.innerHTML = `
@@ -646,6 +765,11 @@ class SmartPackingApp {
         const itemRow = document.createElement('div');
         itemRow.className = `item-card flex items-center justify-between py-2.5 px-2 rounded-xl transition hover:bg-slate-50 ${item.checked ? 'checked' : ''}`;
         
+        const totalItemWeightGrams = (item.weightGrams || 150) * (item.quantity || 1);
+        const totalItemWeightDisplay = totalItemWeightGrams >= 1000 
+          ? `${(totalItemWeightGrams / 1000).toFixed(1)} kg` 
+          : `${totalItemWeightGrams} g`;
+
         itemRow.innerHTML = `
           <div class="flex items-center space-x-3 min-w-0 pr-2">
             <input 
@@ -659,6 +783,9 @@ class SmartPackingApp {
                 <span class="item-name font-medium text-slate-800 text-sm truncate">${item.name}</span>
                 <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full shrink-0">
                   ${item.quantity} ${item.unit || 'ชิ้น'}
+                </span>
+                <span class="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full shrink-0" title="น้ำหนักโดยประมาณ">
+                  <i class="fa-solid fa-weight-hanging text-[9px] mr-1 text-slate-400"></i>${totalItemWeightDisplay}
                 </span>
                 ${item.isEssential ? '<span class="text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded shrink-0">จำเป็น</span>' : ''}
               </div>
@@ -706,6 +833,7 @@ class SmartPackingApp {
     if (item) {
       item.checked = isChecked;
       this.updateProgress();
+      this.updateLuggageWeight();
       this.persistCurrentTrip();
 
       // Update card visual class
@@ -725,6 +853,7 @@ class SmartPackingApp {
   deleteItem(itemId) {
     this.state.items = this.state.items.filter(i => i.id !== itemId);
     this.updateProgress();
+    this.updateLuggageWeight();
     this.persistCurrentTrip();
     this.renderChecklist();
     this.showToast('ลบรายการเรียบร้อยแล้ว', 'info');
@@ -733,6 +862,7 @@ class SmartPackingApp {
   setAllItemsChecked(checkedState) {
     this.state.items.forEach(item => item.checked = checkedState);
     this.updateProgress();
+    this.updateLuggageWeight();
     this.persistCurrentTrip();
     this.renderChecklist();
     this.showToast(checkedState ? 'ติ๊กทุกรายการแล้ว' : 'ยกเลิกการติ๊กทั้งหมดแล้ว', 'info');
@@ -772,6 +902,7 @@ class SmartPackingApp {
     const name = this.dom.addItemName.value.trim();
     const quantity = parseInt(this.dom.addItemQty.value, 10) || 1;
     const unit = this.dom.addItemUnit.value.trim() || 'ชิ้น';
+    const weightGrams = parseInt(this.dom.addItemWeight.value, 10) || 150;
     const category = this.dom.addItemCategory.value;
     const reason = this.dom.addItemReason.value.trim();
 
@@ -786,11 +917,13 @@ class SmartPackingApp {
       checked: false,
       reason: reason || 'เพิ่มโดยผู้ใช้',
       isEssential: false,
-      custom: true
+      custom: true,
+      weightGrams
     };
 
     this.state.items.unshift(newItem);
     this.updateProgress();
+    this.updateLuggageWeight();
     this.persistCurrentTrip();
     this.renderChecklist();
 
@@ -798,8 +931,9 @@ class SmartPackingApp {
     this.dom.formAddItem.reset();
     this.dom.addItemQty.value = '1';
     this.dom.addItemUnit.value = 'ชิ้น';
+    this.dom.addItemWeight.value = '150';
     this.dom.modalAddItem.classList.add('hidden');
-    this.showToast(`เพิ่ม "${name}" ลงในรายการแล้ว`, 'success');
+    this.showToast(`เพิ่ม "${name}" (${weightGrams}g) ลงในรายการแล้ว`, 'success');
   }
 
   persistCurrentTrip() {
@@ -809,7 +943,8 @@ class SmartPackingApp {
       startDate: this.state.startDate,
       endDate: this.state.endDate,
       weather: this.state.weather,
-      items: this.state.items
+      items: this.state.items,
+      baggage: this.state.baggage
     };
     StorageService.saveCurrentTrip(payload);
   }
@@ -821,6 +956,11 @@ class SmartPackingApp {
     this.state.endDate = tripData.endDate || this.formatDateYMD(new Date(Date.now() + 3 * 86400000));
     this.state.weather = tripData.weather;
     this.state.items = tripData.items || [];
+    if (tripData.baggage) {
+      this.state.baggage = { ...this.state.baggage, ...tripData.baggage };
+      this.dom.selectBaggagePreset.value = this.state.baggage.presetId || 'checked_20';
+      this.dom.checkWeightPackedOnly.checked = !!this.state.baggage.packedOnly;
+    }
 
     if (this.state.selectedCity) {
       this.dom.inputCity.value = `${this.state.selectedCity.name}, ${this.state.selectedCity.country}`;
@@ -832,12 +972,14 @@ class SmartPackingApp {
     this.dom.displayDays.textContent = this.state.days;
 
     if (this.state.weather) {
+      this.updateLuggageWeight();
       this.renderWeatherDashboard();
       this.renderChecklist();
       this.updateProgress();
 
       this.dom.emptyState.classList.add('hidden');
       this.dom.weatherSection.classList.remove('hidden');
+      this.dom.weightSection.classList.remove('hidden');
       this.dom.checklistSection.classList.remove('hidden');
     }
   }
@@ -861,6 +1003,7 @@ class SmartPackingApp {
     this.dom.displayDays.textContent = this.state.days;
 
     this.dom.weatherSection.classList.add('hidden');
+    this.dom.weightSection.classList.add('hidden');
     this.dom.checklistSection.classList.add('hidden');
     this.dom.emptyState.classList.remove('hidden');
     this.showToast('ล้างรายการทั้งหมดแล้ว', 'info');
@@ -878,7 +1021,8 @@ class SmartPackingApp {
       startDate: this.state.startDate,
       endDate: this.state.endDate,
       weather: this.state.weather,
-      items: this.state.items
+      items: this.state.items,
+      baggage: this.state.baggage
     };
 
     const tripId = StorageService.saveTripToHistory(tripData);
@@ -914,6 +1058,7 @@ class SmartPackingApp {
         const total = trip.items ? trip.items.length : 0;
         const dateFormatted = new Date(trip.savedAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
         const dateRangeInfo = (trip.startDate && trip.endDate) ? `${this.formatDateThai(trip.startDate)} - ${this.formatDateThai(trip.endDate)}` : `${trip.days} วัน`;
+        const weightInfo = trip.baggage ? ` • ⚖️ ${trip.baggage.totalKg || 0} kg` : '';
 
         item.innerHTML = `
           <div class="cursor-pointer flex-grow pr-3" data-trip-id="${trip.id}">
@@ -924,7 +1069,7 @@ class SmartPackingApp {
             <div class="text-xs text-slate-400 mt-0.5 flex items-center gap-2 flex-wrap">
               <span>📅 ${dateRangeInfo}</span>
               <span>•</span>
-              <span class="text-blue-600 font-medium">เก็บแล้ว ${packed}/${total} ชิ้น</span>
+              <span class="text-blue-600 font-medium">เก็บแล้ว ${packed}/${total} ชิ้น${weightInfo}</span>
             </div>
           </div>
           <div class="flex items-center space-x-1 shrink-0">
@@ -966,7 +1111,8 @@ class SmartPackingApp {
       startDate: this.state.startDate,
       endDate: this.state.endDate,
       weather: this.state.weather,
-      items: this.state.items
+      items: this.state.items,
+      baggage: this.state.baggage
     };
     const text = StorageService.generateTextExport(tripData);
 
@@ -976,7 +1122,7 @@ class SmartPackingApp {
     }
 
     navigator.clipboard.writeText(text).then(() => {
-      this.showToast('คัดลอกรายการลงคลิปบอร์ดเรียบร้อยแล้ว!', 'success');
+      this.showToast('คัดลอกรายการและน้ำหนักลงคลิปบอร์ดเรียบร้อยแล้ว!', 'success');
       this.dom.modalExport.classList.add('hidden');
     }).catch(err => {
       console.error(err);
@@ -992,6 +1138,7 @@ class SmartPackingApp {
       endDate: this.state.endDate,
       weather: this.state.weather,
       items: this.state.items,
+      baggage: this.state.baggage,
       exportedAt: new Date().toISOString()
     };
 

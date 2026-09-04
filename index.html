@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Packing List - จัดกระเป๋าเดินทางตามสภาพอากาศอัจฉริยะ</title>
+  <title>Smart Packing List - จัดกระเป๋าเดินทางตามสภาพอากาศและคำนวณน้ำหนักกระเป๋า</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome 6 Icons -->
@@ -22,7 +22,7 @@
         </div>
         <div>
           <h1 class="text-lg font-bold text-slate-900 leading-tight">Smart Packing List</h1>
-          <p class="text-xs text-slate-500">จัดกระเป๋าอัตโนมัติตามพยากรณ์อากาศจริง</p>
+          <p class="text-xs text-slate-500">จัดกระเป๋าอัตโนมัติ & จำลองน้ำหนักกระเป๋าเดินทาง</p>
         </div>
       </div>
 
@@ -170,7 +170,6 @@
 
     <!-- Weather Dashboard Card (Shown when weather loaded) -->
     <section id="weather-section" class="hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden">
-      <!-- Background Ambient Glow -->
       <div class="absolute -top-24 -right-24 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-24 -left-24 w-72 h-72 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -218,6 +217,87 @@
           <div class="text-slate-200" id="weather-insight-text">
             กำลังวิเคราะห์สภาพอากาศเพื่อเลือกสิ่งของที่เหมาะสม...
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Luggage Weight Calculator Card (NEW FEATURE) -->
+    <section id="weight-section" class="hidden bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shadow-sm">
+            <i class="fa-solid fa-scale-balanced"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">จำลองและชั่งน้ำหนักกระเป๋าเดินทาง (Luggage Scale)</h2>
+            <p class="text-xs text-slate-500">คำนวณน้ำหนักสิ่งของและกระเป๋าเปล่า เทียบกับโควตาสายการบิน</p>
+          </div>
+        </div>
+
+        <!-- Luggage Allowance Preset Selector -->
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="text-xs font-semibold text-slate-600">โควตาสายการบิน:</label>
+          <select id="select-baggage-preset" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Weight Gauge & Metrics Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+        <!-- Current Weight Display (4 cols) -->
+        <div class="md:col-span-4 bg-slate-50 rounded-xl p-4 border border-slate-200 flex flex-col justify-center text-center">
+          <span class="text-xs text-slate-500 font-medium">น้ำหนักรวมกระเป๋าปัจจุบัน</span>
+          <div class="flex items-baseline justify-center space-x-1.5 my-1">
+            <span id="weight-current-kg" class="text-3xl font-black text-slate-900">0.0</span>
+            <span class="text-base font-bold text-slate-500">/ <span id="weight-limit-kg">20.0</span> kg</span>
+          </div>
+          <div id="weight-remaining-badge" class="inline-flex items-center justify-center text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full mt-1">
+            <i class="fa-solid fa-bag-shopping mr-1"></i>
+            <span id="weight-remaining-text">เหลือพื้นที่ช้อปปิ้ง 20.0 kg</span>
+          </div>
+        </div>
+
+        <!-- Weight Progress Bar & Details (8 cols) -->
+        <div class="md:col-span-8 space-y-3">
+          <div class="flex justify-between items-center text-xs font-semibold">
+            <span class="text-slate-600 flex items-center gap-1">
+              <i class="fa-solid fa-chart-pie text-blue-500"></i> สัดส่วนน้ำหนักที่ใช้ไป:
+            </span>
+            <span id="weight-percentage-text" class="text-blue-600 font-bold">0%</span>
+          </div>
+
+          <!-- Weight Bar -->
+          <div class="w-full bg-slate-100 rounded-full h-4 overflow-hidden border border-slate-200 p-0.5">
+            <div id="weight-bar-fill" class="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-blue-500 to-indigo-600 w-0"></div>
+          </div>
+
+          <!-- Sub-breakdown & Options -->
+          <div class="flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2 pt-1">
+            <div class="flex items-center space-x-3">
+              <span>🧳 กระเป๋าเปล่า: <strong id="weight-empty-bag-text" class="text-slate-700">3.8 kg</strong></span>
+              <span>•</span>
+              <span>👕 สัมภาระ: <strong id="weight-items-text" class="text-slate-700">0.0 kg</strong></span>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <label class="text-[11px] text-slate-500 flex items-center cursor-pointer">
+                <input type="checkbox" id="check-weight-packed-only" class="mr-1.5 accent-blue-600 rounded">
+                <span>คิดเฉพาะของที่ติ๊กเก็บแล้ว</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overweight Warning Alert Banner -->
+      <div id="weight-overweight-alert" class="hidden bg-rose-50 border border-rose-200 rounded-xl p-3 text-xs sm:text-sm text-rose-800 flex items-start space-x-2.5">
+        <i class="fa-solid fa-triangle-exclamation text-rose-600 text-lg mt-0.5 shrink-0"></i>
+        <div>
+          <strong class="font-bold">คำเตือน: น้ำหนักกระเป๋าเกินโควตาสายการบิน!</strong>
+          <p class="text-xs text-rose-700 mt-0.5" id="weight-overweight-desc">
+            น้ำหนักเกินไป 0.0 kg แนะนำให้นำของชิ้นหนักออก เช่น เสื้อผ้าหนา หรือซื้อน้ำหนักกระเป๋าเพิ่มกับสายการบินล่วงหน้า
+          </p>
         </div>
       </div>
     </section>
@@ -293,7 +373,7 @@
       <div class="max-w-md mx-auto">
         <h3 class="text-xl font-bold text-slate-800">พร้อมจัดกระเป๋าแล้วหรือยัง?</h3>
         <p class="text-sm text-slate-500 mt-1">
-          เลือกเมืองปลายทางและช่วงวันเดินทางด้านบน เพื่อให้ระบบดึงข้อมูลพยากรณ์อากาศแบบตรงวัน และคำนวณสิ่งที่ต้องเตรียมให้ทันที!
+          เลือกเมืองปลายทางและช่วงวันเดินทางด้านบน เพื่อให้ระบบดึงข้อมูลพยากรณ์อากาศแบบตรงวัน พร้อมคำนวณสิ่งที่ต้องเตรียมและจำลองน้ำหนักกระเป๋าให้อัตโนมัติ!
         </p>
       </div>
       <div class="pt-2 flex justify-center gap-2">
@@ -310,6 +390,8 @@
     <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
       <div>Smart Packing List &copy; 2026 • ข้อมูลสภาพอากาศแม่นยำจาก Open-Meteo API</div>
       <div class="flex items-center space-x-3 text-slate-500">
+        <span><i class="fa-solid fa-scale-balanced text-amber-500 mr-1"></i>คำนวณน้ำหนักกระเป๋า</span>
+        <span>•</span>
         <span><i class="fa-solid fa-database text-emerald-500 mr-1"></i>บันทึกอัตโนมัติ (LocalStorage)</span>
       </div>
     </div>
@@ -333,14 +415,18 @@
           <input type="text" id="add-item-name" required placeholder="เช่น กล้องถ่ายรูป, คอนแทคเลนส์, ขาตั้งกล้อง" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-3 gap-2.5">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">จำนวน</label>
             <input type="number" id="add-item-qty" min="1" max="99" value="1" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">หน่วย</label>
-            <input type="text" id="add-item-unit" value="ชิ้น" placeholder="ชิ้น, อัน, ตัว, ชุด" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <input type="text" id="add-item-unit" value="ชิ้น" placeholder="ชิ้น, อัน, ตัว" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">น้ำหนัก (กรัม)</label>
+            <input type="number" id="add-item-weight" min="1" max="10000" value="150" placeholder="150" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
         </div>
 
@@ -406,7 +492,7 @@
           </div>
           <div>
             <div class="text-sm font-semibold text-slate-800">คัดลอกข้อความ (Copy to Clipboard)</div>
-            <div class="text-xs text-slate-500">คัดลอกรายการเช็กลิสต์ทั้งหมดนำไปส่งใน LINE หรือ Note</div>
+            <div class="text-xs text-slate-500">คัดลอกรายการเช็กลิสต์และสรุปน้ำหนักนำไปส่งใน LINE หรือ Note</div>
           </div>
         </button>
 
