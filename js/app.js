@@ -1042,26 +1042,40 @@ class SmartPackingApp {
           ? `${(totalItemWeightGrams / 1000).toFixed(1)} kg` 
           : `${totalItemWeightGrams} g`;
 
-        let affiliateSearchKeyword = null;
-        if (APP_CONFIG.AFFILIATE?.ENABLED && APP_CONFIG.AFFILIATE?.ITEM_KEYWORDS) {
-          for (const [key, kw] of Object.entries(APP_CONFIG.AFFILIATE.ITEM_KEYWORDS)) {
-            if (item.name.includes(key)) {
-              affiliateSearchKeyword = kw;
-              break;
+        let affiliateUrl = null;
+        let isDirectShopee = false;
+        if (APP_CONFIG.AFFILIATE?.ENABLED) {
+          // 1. Check exact custom direct link first
+          if (APP_CONFIG.AFFILIATE.ITEM_EXACT_LINKS) {
+            for (const [key, directUrl] of Object.entries(APP_CONFIG.AFFILIATE.ITEM_EXACT_LINKS)) {
+              if (item.name.toLowerCase().includes(key.toLowerCase())) {
+                affiliateUrl = directUrl;
+                isDirectShopee = true;
+                break;
+              }
+            }
+          }
+          // 2. Fallback to keyword search on Shopee
+          if (!affiliateUrl && APP_CONFIG.AFFILIATE.ITEM_KEYWORDS) {
+            for (const [key, kw] of Object.entries(APP_CONFIG.AFFILIATE.ITEM_KEYWORDS)) {
+              if (item.name.toLowerCase().includes(key.toLowerCase())) {
+                affiliateUrl = APP_CONFIG.AFFILIATE.PLATFORMS.SHOPEE.searchUrl(kw);
+                break;
+              }
             }
           }
         }
 
-        const affiliateBadge = affiliateSearchKeyword ? `
+        const affiliateBadge = affiliateUrl ? `
           <a 
-            href="${APP_CONFIG.AFFILIATE.PLATFORMS.SHOPEE.searchUrl(affiliateSearchKeyword)}" 
+            href="${affiliateUrl}" 
             target="_blank" 
             rel="noopener noreferrer sponsored" 
             class="inline-flex items-center gap-1 text-[10px] font-semibold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 hover:bg-orange-100 dark:hover:bg-orange-900/80 border border-orange-200 dark:border-orange-800/80 px-1.5 py-0.5 rounded-full transition shrink-0 no-print" 
-            title="ค้นหาและสั่งซื้อบน Shopee"
+            title="${isDirectShopee ? 'ดูสินค้าแนะนำบน Shopee' : 'ค้นหาและสั่งซื้อบน Shopee'}"
           >
             <i class="fa-solid fa-bag-shopping text-[8px]"></i>
-            <span>หาซื้อ</span>
+            <span>${isDirectShopee ? 'ช้อป Shopee' : 'หาซื้อ'}</span>
           </a>
         ` : '';
 
@@ -1191,45 +1205,58 @@ class SmartPackingApp {
       });
     }
 
-    // 3. Luggage Scale (High conversion, always needed)
+    // 3. Luggage Scale (Direct Shopee Affiliate Link)
     gearItems.push({
       title: 'เครื่องชั่งน้ำหนักกระเป๋าพกพา',
       icon: 'fa-weight-scale',
       iconColor: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950/60',
-      badge: 'กันน้ำหนักเกิน',
+      badge: 'Shopee แนะนำ',
       badgeClass: 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950',
       desc: 'เช็กน้ำหนักสัมภาระก่อนไปสนามบิน ป้องกันถูกปรับค่าน้ำหนักเกินกิโลละ 500-1,000 บ.',
-      shopeeKw: 'เครื่องชั่งน้ำหนักกระเป๋าเดินทาง พกพา ดิจิตอล',
+      shopeeUrl: APP_CONFIG.AFFILIATE.DIRECT_LINKS.SCALE,
       lazadaKw: 'ที่ชั่งน้ำหนักกระเป๋าเดินทาง'
     });
 
-    // 4. Universal Travel Adapter (Abroad)
+    // 4. Suitcase (Direct Shopee Affiliate Link)
+    gearItems.push({
+      title: 'กระเป๋าเดินทางล้อลากน้ำหนักเบา',
+      icon: 'fa-suitcase-rolling',
+      iconColor: 'text-blue-500 bg-blue-50 dark:bg-blue-950/60',
+      badge: 'Shopee แนะนำ',
+      badgeClass: 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-950',
+      desc: 'ทนทาน ล้อลื่น 360 องศา น้ำหนักเบา จุสัมภาระได้เต็มที่ไม่เกินโควตาสายการบิน',
+      shopeeUrl: APP_CONFIG.AFFILIATE.DIRECT_LINKS.SUITCASE,
+      lazadaKw: 'กระเป๋าเดินทางล้อลาก'
+    });
+
+    // 5. Universal Travel Adapter (Abroad - Direct Shopee Affiliate Link)
     if (!isDomestic) {
       gearItems.push({
-        title: 'Universal Adapter All-in-one',
+        title: 'Universal Travel Adapter All-in-one',
         icon: 'fa-plug',
         iconColor: 'text-purple-500 bg-purple-50 dark:bg-purple-950/60',
-        badge: 'เต้ารับทั่วโลก',
+        badge: 'Shopee แนะนำ',
         badgeClass: 'text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950',
-        desc: 'รองรับปลั๊กไฟ 150+ ประเทศ พร้อมพอร์ต USB-C Fast Charge ไม่ต้องพกหัวชาร์จหลายตัว',
-        shopeeKw: 'universal travel adapter หัวแปลงปลั๊กสากล type c',
+        desc: 'รองรับปลั๊กไฟ 150+ ประเทศ พร้อมพอร์ต USB-C Fast Charge ชาร์จไวพกตัวเดียวจบ',
+        shopeeUrl: APP_CONFIG.AFFILIATE.DIRECT_LINKS.ADAPTER,
         lazadaKw: 'universal travel adapter'
       });
 
-      // 5. eSIM / Net via Klook
+      // 6. eSIM (Abroad - Direct Shopee Affiliate Link)
       gearItems.push({
         title: `eSIM เน็ตเที่ยว ${dest.name || 'ต่างประเทศ'}`,
         icon: 'fa-qrcode',
         iconColor: 'text-amber-500 bg-amber-50 dark:bg-amber-950/60',
-        badge: 'เน็ตไม่จำกัด',
+        badge: 'Shopee แนะนำ',
         badgeClass: 'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950',
-        desc: 'สแกน QR Code ใช้งานได้ทันทีเมื่อแลนดิ้ง ไม่ต้องถอดเปลี่ยนซิมเดิม',
+        desc: 'สแกน QR Code ใช้งานเน็ตได้ทันทีเมื่อแลนดิ้ง ไม่ต้องถอดเปลี่ยนซิมเดิม',
+        shopeeUrl: APP_CONFIG.AFFILIATE.DIRECT_LINKS.ESIM,
         klookDest: `${dest.name || dest.country || ''} eSIM`,
-        isKlook: true
+        isEsim: true
       });
     }
 
-    // 6. Packing Cubes (Space Saver)
+    // 7. Packing Cubes (Space Saver)
     gearItems.push({
       title: 'กระเป๋าจัดระเบียบ 6-in-1',
       icon: 'fa-boxes-packing',
@@ -1242,7 +1269,10 @@ class SmartPackingApp {
     });
 
     // Render cards into grid
-    this.dom.affiliateGearGrid.innerHTML = gearItems.map(item => `
+    this.dom.affiliateGearGrid.innerHTML = gearItems.map(item => {
+      const shopeeTargetUrl = item.shopeeUrl || APP_CONFIG.AFFILIATE.PLATFORMS.SHOPEE.searchUrl(item.shopeeKw);
+      
+      return `
       <div class="bg-white dark:bg-slate-900 rounded-xl p-3 sm:p-3.5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-2 hover:border-orange-300 dark:hover:border-orange-800 transition group">
         <div>
           <div class="flex items-start justify-between gap-2 mb-1.5">
@@ -1256,26 +1286,26 @@ class SmartPackingApp {
         </div>
 
         <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-1.5 flex-wrap">
-          ${item.isKlook ? `
+          <a 
+            href="${shopeeTargetUrl}" 
+            target="_blank" 
+            rel="noopener noreferrer sponsored" 
+            class="flex-1 py-1.5 px-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 shadow-sm transition"
+          >
+            <i class="fa-solid fa-bag-shopping text-[10px]"></i>
+            <span>Shopee</span>
+          </a>
+          ${item.isEsim ? `
             <a 
               href="${APP_CONFIG.AFFILIATE.PLATFORMS.KLOOK.searchUrl(item.klookDest)}" 
               target="_blank" 
               rel="noopener noreferrer sponsored" 
-              class="w-full py-1.5 px-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition"
+              class="flex-1 py-1.5 px-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 shadow-sm transition"
             >
-              <i class="fa-solid fa-ticket text-[11px]"></i>
-              <span>ดูแพ็กเกจ eSIM (Klook)</span>
+              <i class="fa-solid fa-ticket text-[10px]"></i>
+              <span>Klook</span>
             </a>
           ` : `
-            <a 
-              href="${APP_CONFIG.AFFILIATE.PLATFORMS.SHOPEE.searchUrl(item.shopeeKw)}" 
-              target="_blank" 
-              rel="noopener noreferrer sponsored" 
-              class="flex-1 py-1.5 px-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 shadow-sm transition"
-            >
-              <i class="fa-solid fa-bag-shopping text-[10px]"></i>
-              <span>Shopee</span>
-            </a>
             <a 
               href="${APP_CONFIG.AFFILIATE.PLATFORMS.LAZADA.searchUrl(item.lazadaKw || item.shopeeKw)}" 
               target="_blank" 
@@ -1288,7 +1318,8 @@ class SmartPackingApp {
           `}
         </div>
       </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   toggleItemChecked(itemId, isChecked) {

@@ -30,11 +30,24 @@ export const APP_CONFIG = {
   ],
   AFFILIATE: {
     ENABLED: true,
-    // ใส่ Affiliate Tracking ID ของ Shopee / Lazada / Klook ได้ที่นี่
-    TRACKING_IDS: {
-      SHOPEE: '', // ตัวอย่าง: 'panusbodee_shopee'
-      LAZADA: '',
-      KLOOK: ''
+    // ลิงก์ตรง Shopee Affiliate ของคุณ Panusbodee
+    DIRECT_LINKS: {
+      SCALE: 'https://s.shopee.co.th/1LfUtpaDm8',       // เครื่องชั่งน้ำหนักกระเป๋า
+      ADAPTER: 'https://s.shopee.co.th/W6NuWtbFJ',     // อะแดปเตอร์สากล
+      ESIM: 'https://s.shopee.co.th/7psydzJ9JD',        // eSIM ท่องเที่ยว
+      SUITCASE: 'https://s.shopee.co.th/4fvws9ePKr'     // กระเป๋าเดินทาง
+    },
+    // ลิงก์ตรงแบบเจาะจงสำหรับไอเทมในเช็กลิสต์
+    ITEM_EXACT_LINKS: {
+      'ชั่งน้ำหนัก': 'https://s.shopee.co.th/1LfUtpaDm8',
+      'ตาชั่ง': 'https://s.shopee.co.th/1LfUtpaDm8',
+      'หัวแปลงปลั๊ก': 'https://s.shopee.co.th/W6NuWtbFJ',
+      'อะแดปเตอร์': 'https://s.shopee.co.th/W6NuWtbFJ',
+      'Adapter': 'https://s.shopee.co.th/W6NuWtbFJ',
+      'ปลั๊ก': 'https://s.shopee.co.th/W6NuWtbFJ',
+      'eSIM': 'https://s.shopee.co.th/7psydzJ9JD',
+      'ซิม': 'https://s.shopee.co.th/7psydzJ9JD',
+      'กระเป๋าเดินทาง': 'https://s.shopee.co.th/4fvws9ePKr'
     },
     PLATFORMS: {
       SHOPEE: {
