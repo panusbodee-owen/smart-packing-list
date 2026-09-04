@@ -2,8 +2,87 @@
 <html lang="th" class="light" data-accent="ocean">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Smart Packing List - จัดกระเป๋าตามสภาพอากาศ, คำนวณงบ & ชั่งน้ำหนักกระเป๋า</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary Meta Tags -->
+  <title>Smart Packing List - จัดกระเป๋าตามสภาพอากาศ คำนวณงบเที่ยว & ชั่งน้ำหนักกระเป๋า | By Panusbodee</title>
+  <meta name="title" content="Smart Packing List - จัดกระเป๋าตามสภาพอากาศ คำนวณงบเที่ยว & ชั่งน้ำหนักกระเป๋า | By Panusbodee">
+  <meta name="description" content="Smart Packing List เว็บจัดกระเป๋าเดินทางอัจฉริยะตามสภาพอากาศจริงจาก Weather API แนะนำของที่ต้องเตรียม คำนวณงบทริป แปลงค่าเงินสด และชั่งน้ำหนักกระเป๋าสัมภาระขึ้นเครื่องบิน ใช้งานฟรี 100% พัฒนาโดย Panusbodee">
+  <meta name="keywords" content="Smart Packing List, จัดกระเป๋า, จัดกระเป๋าเดินทาง, เช็คสภาพอากาศ, พยากรณ์อากาศ, ชั่งน้ำหนักกระเป๋า, คำนวณงบเที่ยว, แปลงค่าเงิน, packing checklist, travel packing list, weather forecast packing, Panusbodee">
+  <meta name="author" content="Panusbodee Sontitrakul">
+  <meta name="creator" content="Panusbodee">
+  <meta name="publisher" content="Panusbodee">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical" href="https://panusbodee-owen.github.io/smart-packing-list/">
+
+  <!-- Theme & Mobile App Meta -->
+  <meta name="theme-color" content="#2563eb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Smart Packing">
+
+  <!-- Favicon & Icons -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="favicon.svg">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://panusbodee-owen.github.io/smart-packing-list/">
+  <meta property="og:title" content="Smart Packing List - จัดกระเป๋าตามสภาพอากาศ คำนวณงบเที่ยว & ชั่งน้ำหนักกระเป๋า">
+  <meta property="og:description" content="เว็บจัดกระเป๋าอัจฉริยะตามพยากรณ์อากาศจริง แนะนำเสื้อผ้าและของใช้จำเป็น คำนวณงบประมาณและจำลองชั่งน้ำหนักสัมภาระขึ้นเครื่องบิน ใช้งานฟรี 100% โดย Panusbodee">
+  <meta property="og:image" content="https://panusbodee-owen.github.io/smart-packing-list/og-image.svg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Smart Packing List Web App Preview">
+  <meta property="og:site_name" content="Smart Packing List">
+  <meta property="og:locale" content="th_TH">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://panusbodee-owen.github.io/smart-packing-list/">
+  <meta name="twitter:title" content="Smart Packing List - จัดกระเป๋าตามสภาพอากาศ | By Panusbodee">
+  <meta name="twitter:description" content="เว็บจัดกระเป๋าอัจฉริยะตามสภาพอากาศจริง คำนวณงบประมาณ และชั่งน้ำหนักสัมภาระขึ้นเครื่องบิน พัฒนาโดย Panusbodee">
+  <meta name="twitter:image" content="https://panusbodee-owen.github.io/smart-packing-list/og-image.svg">
+  <meta name="twitter:creator" content="@panusbodee">
+
+  <!-- Structured Data / JSON-LD for Google Rich Results -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Smart Packing List",
+    "alternateName": "เว็บจัดกระเป๋าตามสภาพอากาศ",
+    "url": "https://panusbodee-owen.github.io/smart-packing-list/",
+    "applicationCategory": "TravelApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript. Requires HTML5.",
+    "description": "เว็บจัดกระเป๋าเดินทางอัจฉริยะตามสภาพอากาศจริงจาก Weather API คำนวณงบประมาณ แปลงค่าเงินสด และชั่งน้ำหนักกระเป๋าสัมภาระขึ้นเครื่องบิน",
+    "inLanguage": ["th", "en"],
+    "isAccessibleForFree": true,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "THB"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Panusbodee",
+      "url": "https://github.com/panusbodee-owen"
+    },
+    "featureList": [
+      "พยากรณ์อากาศแบบเรียลไทม์ผ่าน Open-Meteo API",
+      "ระบบแนะนำของใช้และเสื้อผ้าอัตโนมัติตามสภาพอากาศและจำนวนวันเดินทาง",
+      "เครื่องจำลองชั่งน้ำหนักสัมภาระขึ้นเครื่องบิน (Carry-on & Checked Baggage)",
+      "เครื่องคำนวณงบประมาณทริปและแปลงอัตราแลกเปลี่ยนเงินสดเรียลไทม์",
+      "ระบบบันทึกรายการจัดกระเป๋าและประวัติทริปใน LocalStorage",
+      "รองรับ Dark Mode และการปรับแต่งชุดสีธีม"
+    ]
+  }
+  </script>
+
   <!-- Tailwind CSS with Dark Mode -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>

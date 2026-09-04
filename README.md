@@ -38,7 +38,11 @@
   - 🌅 **Sunset Orange**
   - 🌲 **Forest Green**
   - 🍇 **Royal Purple**
-- บันทึกการตั้งค่าธีมลงใน `localStorage` ใช้งานครั้งถัดไปธีมยังคงเดิม
+
+### 6. 🔍 Search Engine Optimization (SEO & Social Sharing)
+- **Meta Tags & Open Graph**: ตั้งค่า Title, Description, Canonical URL, Keywords และ Open Graph / Twitter Card ครบถ้วน
+- **Schema.org Structured Data**: ใส่ JSON-LD WebApplication และ TravelApplication เพื่อรองรับ Google Rich Snippets
+- **Crawlers Support**: มี `sitemap.xml` และ `robots.txt` พร้อม Favicon (SVG) และภาพปก Social Share Image (1200x630)
 
 ---
 

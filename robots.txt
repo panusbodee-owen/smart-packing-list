@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://panusbodee-owen.github.io/smart-packing-list/sitemap.xml
