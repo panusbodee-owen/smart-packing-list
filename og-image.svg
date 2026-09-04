@@ -63,6 +63,6 @@
 
   <!-- Bottom URL / Footer -->
   <line x1="90" y1="510" x2="1110" y2="510" stroke="#334155" stroke-width="1" />
-  <text x="90" y="560" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18">https://panusbodee-owen.github.io/smart-packing-list/</text>
+  <text x="90" y="560" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18">https://panusbodee-owen.github.io/</text>
   <text x="1110" y="560" fill="#64748b" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" text-anchor="end">Open-Meteo API • LocalStorage</text>
 </svg>
