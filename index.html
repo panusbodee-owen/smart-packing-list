@@ -100,6 +100,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <!-- Custom CSS -->
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- Google AdSense (Auto Ads & Verification) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4511482626256141"
+     crossorigin="anonymous"></script>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased min-h-screen flex flex-col transition-colors duration-200">
 
@@ -732,12 +736,10 @@
           <i class="fa-brands fa-github"></i> Create By Panusbodee
         </a>
       </div>
-      <div class="flex items-center space-x-2 sm:space-x-3 text-slate-500 dark:text-slate-400 text-[11px] sm:text-xs">
-        <span><i class="fa-solid fa-coins text-emerald-500 mr-1"></i>งบ</span>
+      <div class="flex items-center space-x-2.5 sm:space-x-3 text-slate-500 dark:text-slate-400 text-[11px] sm:text-xs">
+        <button id="btn-open-privacy" class="hover:text-blue-600 dark:hover:text-blue-400 underline transition">นโยบายความเป็นส่วนตัว (Privacy Policy)</button>
         <span>•</span>
-        <span><i class="fa-solid fa-scale-balanced text-amber-500 mr-1"></i>ชั่งน้ำหนัก</span>
-        <span>•</span>
-        <span><i class="fa-solid fa-cloud-sun text-blue-500 mr-1"></i>พยากรณ์</span>
+        <a href="https://github.com/panusbodee-owen" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 dark:hover:text-blue-400 underline transition">ติดต่อผู้พัฒนา</a>
       </div>
     </div>
   </footer>
@@ -864,6 +866,51 @@
 
       <div class="pt-2 text-center">
         <button id="btn-close-export-footer" class="px-4 py-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition">ปิดหน้าต่าง</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Privacy Policy (Required for Google AdSense Approval) -->
+  <div id="modal-privacy" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-backdrop bg-slate-900/60">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-3.5 border border-slate-100 dark:border-slate-800 max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
+        <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-shield-halved text-blue-600 dark:text-blue-400"></i> นโยบายความเป็นส่วนตัว (Privacy Policy)
+        </h3>
+        <button id="btn-close-privacy-modal" aria-label="ปิดหน้าต่างนโยบาย" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="text-xs text-slate-600 dark:text-slate-300 space-y-3 leading-relaxed">
+        <p>
+          เว็บแอปพลิเคชัน <strong>Smart Packing List</strong> ให้ความสำคัญอย่างยิ่งต่อความเป็นส่วนตัวของผู้ใช้งาน หน้านี้อธิบายถึงนโยบายในการจัดเก็บและใช้งานข้อมูล:
+        </p>
+        <div>
+          <h4 class="font-bold text-slate-800 dark:text-white mb-0.5">1. การจัดเก็บข้อมูลของผู้ใช้ (Local Storage)</h4>
+          <p>ข้อมูลรายการจัดกระเป๋า, จำนวนวัน, การตั้งค่าธีม และประวัติทริปจะถูกจัดเก็บอยู่บนเบราว์เซอร์ของท่านผ่านเทคโนโลยี LocalStorage โดยตรง ไม่มีการส่งข้อมูลรายการของท่านไปยังเซิร์ฟเวอร์ภายนอก</p>
+        </div>
+        <div>
+          <h4 class="font-bold text-slate-800 dark:text-white mb-0.5">2. คุกกี้และโฆษณา (Google AdSense &amp; Third-Party Cookies)</h4>
+          <p>
+            เว็บไซต์นี้ใช้บริการโฆษณาจาก <strong>Google AdSense</strong> ซึ่งผู้ให้บริการภายนอกรวมถึง Google จะใช้คุกกี้ (Cookies) เพื่อแสดงโฆษณาตามการเข้าชมเว็บไซต์ของผู้ใช้ ทั้งในเว็บไซต์นี้และเว็บไซต์อื่น ๆ บนอินเทอร์เน็ต
+          </p>
+          <p class="mt-1">
+            ผู้ใช้สามารถเลือกปิดใช้งานคุกกี้สำหรับการโฆษณาตามความสนใจ (Personalized Advertising) ได้โดยไปที่ <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 underline">Google Ads Settings</a>
+          </p>
+        </div>
+        <div>
+          <h4 class="font-bold text-slate-800 dark:text-white mb-0.5">3. ลิงก์พันธมิตร (Affiliate Disclosure)</h4>
+          <p>บางลิงก์บนเว็บไซต์นี้เป็นลิงก์พันธมิตร (เช่น Shopee, Lazada, Klook) ซึ่งเมื่อท่านคลิกและสั่งซื้อสินค้า ผู้พัฒนาอาจได้รับค่าคอมมิชชันส่วนแบ่งเล็กน้อยโดยไม่มีค่าใช้จ่ายเพิ่มเติมใด ๆ แก่ท่าน</p>
+        </div>
+        <div>
+          <h4 class="font-bold text-slate-800 dark:text-white mb-0.5">4. ข้อมูลสภาพอากาศและอัตราแลกเปลี่ยน</h4>
+          <p>ข้อมูลสภาพอากาศดึงมาจาก Open-Meteo API และอัตราแลกเปลี่ยนดึงมาจาก Interbank Open Exchange Rates ซึ่งเป็นบริการสาธารณะที่ไม่มีการเก็บข้อมูลส่วนบุคคล</p>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-slate-100 dark:border-slate-800 text-center">
+        <button id="btn-close-privacy-footer" class="px-4 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg font-medium text-slate-700 dark:text-slate-200 text-xs transition">รับทราบและปิด</button>
       </div>
     </div>
   </div>

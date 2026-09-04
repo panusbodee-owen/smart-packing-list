@@ -173,6 +173,12 @@ class SmartPackingApp {
       btnActionPrint: document.getElementById('btn-action-print'),
       btnActionDownloadJson: document.getElementById('btn-action-download-json'),
 
+      // Privacy Policy Modal (AdSense Compliance)
+      modalPrivacy: document.getElementById('modal-privacy'),
+      btnOpenPrivacy: document.getElementById('btn-open-privacy'),
+      btnClosePrivacyModal: document.getElementById('btn-close-privacy-modal'),
+      btnClosePrivacyFooter: document.getElementById('btn-close-privacy-footer'),
+
       // Print
       printTitle: document.getElementById('print-title'),
       printSubtitle: document.getElementById('print-subtitle'),
@@ -493,6 +499,17 @@ class SmartPackingApp {
     this.dom.btnExportOptions.addEventListener('click', () => this.dom.modalExport.classList.remove('hidden'));
     this.dom.btnCloseExportModal.addEventListener('click', () => this.dom.modalExport.classList.add('hidden'));
     this.dom.btnCloseExportFooter.addEventListener('click', () => this.dom.modalExport.classList.add('hidden'));
+
+    // Privacy Policy Modal
+    if (this.dom.btnOpenPrivacy) {
+      this.dom.btnOpenPrivacy.addEventListener('click', () => this.dom.modalPrivacy?.classList.remove('hidden'));
+    }
+    if (this.dom.btnClosePrivacyModal) {
+      this.dom.btnClosePrivacyModal.addEventListener('click', () => this.dom.modalPrivacy?.classList.add('hidden'));
+    }
+    if (this.dom.btnClosePrivacyFooter) {
+      this.dom.btnClosePrivacyFooter.addEventListener('click', () => this.dom.modalPrivacy?.classList.add('hidden'));
+    }
 
     // Export Actions
     this.dom.btnActionCopyText.addEventListener('click', () => this.copyChecklistText());
