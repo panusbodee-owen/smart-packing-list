@@ -30,6 +30,12 @@ export const APP_CONFIG = {
   ],
   AFFILIATE: {
     ENABLED: true,
+    // บัญชี Shopee Affiliate ของคุณ Panusbodee (PAbodee)
+    ACCOUNT: {
+      NAME: 'PAbodee',
+      USERNAME: 'panusbodeepisutsuwimol',
+      MY_COLLECTION_URL: 'https://mycollection.shop/panusbodeepisutsuwimol'
+    },
     // ลิงก์ตรง Shopee Affiliate ของคุณ Panusbodee
     DIRECT_LINKS: {
       SCALE: 'https://s.shopee.co.th/1LfUtpaDm8',       // เครื่องชั่งน้ำหนักกระเป๋า
