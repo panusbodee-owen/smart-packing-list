@@ -41,16 +41,37 @@
 body {
   font-family: var(--font-main);
   transition: background-color 0.3s ease, color 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Custom Checkbox Design */
+/* iOS Safari Zoom Prevention on Inputs */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Custom Checkbox Design with Touch-friendly area */
+.custom-checkbox-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  cursor: pointer;
+}
+
 .custom-checkbox {
   appearance: none;
   -webkit-appearance: none;
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 1.4rem;
+  height: 1.4rem;
   border: 2px solid #cbd5e1;
-  border-radius: 0.375rem;
+  border-radius: 0.45rem;
   outline: none;
   cursor: pointer;
   display: inline-grid;
@@ -122,14 +143,56 @@ body {
   transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Weather Daily Forecast Card Hover */
+/* Weather Daily Forecast Card Hover & Mobile Scroll */
+.weather-carousel-scroll {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  gap: 0.625rem;
+  padding-bottom: 0.5rem;
+}
+
+.weather-carousel-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.weather-carousel-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+}
+
 .weather-day-card {
+  scroll-snap-align: start;
+  flex: 0 0 95px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+@media (min-width: 640px) {
+  .weather-day-card {
+    flex: 0 0 110px;
+  }
 }
 
 .weather-day-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px -4px rgba(0, 0, 0, 0.12);
+}
+
+/* Horizontal Chip Scroller on Mobile */
+.chip-scroll-container {
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  gap: 0.375rem;
+  padding: 0.25rem 0;
+}
+
+.chip-scroll-container::-webkit-scrollbar {
+  display: none;
 }
 
 /* Autocomplete Suggestion Dropdown */
