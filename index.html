@@ -23,16 +23,22 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Smart Packing">
 
-  <!-- Favicon & Icons -->
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="apple-touch-icon" href="favicon.svg">
+  <!-- Web App Manifest (PWA & Mobile SEO) -->
+  <link rel="manifest" href="manifest.json">
 
-  <!-- Open Graph / Facebook -->
+  <!-- Favicon & Touch Icons -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+
+  <!-- Open Graph / Facebook / LINE -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://panusbodee-owen.github.io/smart-packing-list/">
   <meta property="og:title" content="Smart Packing List - จัดกระเป๋าตามสภาพอากาศ คำนวณงบเที่ยว & ชั่งน้ำหนักกระเป๋า">
   <meta property="og:description" content="เว็บจัดกระเป๋าอัจฉริยะตามพยากรณ์อากาศจริง แนะนำเสื้อผ้าและของใช้จำเป็น คำนวณงบประมาณและจำลองชั่งน้ำหนักสัมภาระขึ้นเครื่องบิน ใช้งานฟรี 100% โดย Panusbodee">
-  <meta property="og:image" content="https://panusbodee-owen.github.io/smart-packing-list/og-image.svg">
+  <meta property="og:image" content="https://panusbodee-owen.github.io/smart-packing-list/og-image.png">
+  <meta property="og:image:secure_url" content="https://panusbodee-owen.github.io/smart-packing-list/og-image.png">
+  <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Smart Packing List Web App Preview">
@@ -45,7 +51,7 @@
   <meta name="twitter:url" content="https://panusbodee-owen.github.io/smart-packing-list/">
   <meta name="twitter:title" content="Smart Packing List - จัดกระเป๋าตามสภาพอากาศ | By Panusbodee">
   <meta name="twitter:description" content="เว็บจัดกระเป๋าอัจฉริยะตามสภาพอากาศจริง คำนวณงบประมาณ และชั่งน้ำหนักสัมภาระขึ้นเครื่องบิน พัฒนาโดย Panusbodee">
-  <meta name="twitter:image" content="https://panusbodee-owen.github.io/smart-packing-list/og-image.svg">
+  <meta name="twitter:image" content="https://panusbodee-owen.github.io/smart-packing-list/og-image.png">
   <meta name="twitter:creator" content="@panusbodee">
 
   <!-- Structured Data / JSON-LD for Google Rich Results -->
@@ -206,7 +212,7 @@
             <div class="absolute inset-y-0 left-0 pl-3 sm:pl-3.5 flex items-center pointer-events-none text-slate-400">
               <i class="fa-solid fa-magnifying-glass text-xs sm:text-sm"></i>
             </div>
-            <button id="btn-clear-city" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <button id="btn-clear-city" aria-label="ล้างชื่อเมือง" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
               <i class="fa-solid fa-circle-xmark text-sm"></i>
             </button>
           </div>
@@ -697,7 +703,7 @@
         <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <i class="fa-solid fa-circle-plus text-blue-600 dark:text-blue-400"></i> เพิ่มสิ่งของในรายการ
         </h3>
-        <button id="btn-close-add-modal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+        <button id="btn-close-add-modal" aria-label="ปิดหน้าต่างเพิ่มรายการ" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
@@ -750,7 +756,7 @@
         <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <i class="fa-solid fa-clock-rotate-left text-blue-600 dark:text-blue-400"></i> ทริปที่บันทึกไว้
         </h3>
-        <button id="btn-close-history-modal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+        <button id="btn-close-history-modal" aria-label="ปิดหน้าต่างประวัติทริป" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
@@ -773,7 +779,7 @@
         <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <i class="fa-solid fa-share-from-square text-indigo-600 dark:text-indigo-400"></i> แชร์หรือส่งออกรายการ
         </h3>
-        <button id="btn-close-export-modal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+        <button id="btn-close-export-modal" aria-label="ปิดหน้าต่างส่งออก" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
