@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Packing List - จัดกระเป๋าเดินทางตามสภาพอากาศอัจฉริยะ</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- Navigation Bar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm no-print">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+          <i class="fa-solid fa-suitcase-rolling text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-slate-900 leading-tight">Smart Packing List</h1>
+          <p class="text-xs text-slate-500">จัดกระเป๋าอัตโนมัติตามพยากรณ์อากาศจริง</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2" id="header-actions">
+        <button id="btn-open-history" class="px-3 py-1.5 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition flex items-center space-x-1.5">
+          <i class="fa-solid fa-bookmark text-blue-600"></i>
+          <span class="hidden sm:inline">ทริปที่บันทึก</span>
+          <span id="saved-trips-count" class="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">0</span>
+        </button>
+
+        <button id="btn-export-options" class="px-3 py-1.5 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition flex items-center space-x-1.5">
+          <i class="fa-solid fa-share-nodes text-indigo-600"></i>
+          <span class="hidden sm:inline">แชร์ / พิมพ์</span>
+        </button>
+
+        <button id="btn-reset-trip" title="ล้างและเริ่มใหม่" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition">
+          <i class="fa-solid fa-rotate-left"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+    <!-- Print Header Only -->
+    <div class="hidden print-only mb-6 border-b pb-4">
+      <h1 class="text-2xl font-bold" id="print-title">Smart Packing List</h1>
+      <p class="text-sm text-slate-600" id="print-subtitle"></p>
+    </div>
+
+    <!-- Search & Travel Planning Section (Card) -->
+    <section id="search-section" class="bg-white rounded-2xl p-5 sm:p-7 shadow-sm border border-slate-200 space-y-4">
+      
+      <!-- Top Row: City & Date Range -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        
+        <!-- City Input & Autocomplete (5 cols) -->
+        <div class="lg:col-span-5 relative">
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">
+            <i class="fa-solid fa-location-dot text-rose-500 mr-1.5"></i> เมืองปลายทาง
+          </label>
+          <div class="relative">
+            <input 
+              type="text" 
+              id="input-city" 
+              placeholder="พิมพ์ชื่อเมือง เช่น โตเกียว, Tokyo, Chiang Mai, London..." 
+              autocomplete="off"
+              class="w-full pl-10 pr-10 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder:text-slate-400 font-normal"
+            >
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <button id="btn-clear-city" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+              <i class="fa-solid fa-circle-xmark"></i>
+            </button>
+          </div>
+
+          <!-- Autocomplete Dropdown -->
+          <div id="autocomplete-list" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-50 autocomplete-dropdown divide-y divide-slate-100">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Travel Start Date (3 cols) -->
+        <div class="lg:col-span-3">
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">
+            <i class="fa-regular fa-calendar-plus text-blue-500 mr-1.5"></i> วันที่เริ่มเดินทาง
+          </label>
+          <div class="relative">
+            <input 
+              type="date" 
+              id="input-start-date" 
+              class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-800 transition"
+            >
+          </div>
+        </div>
+
+        <!-- Travel End Date (3 cols) -->
+        <div class="lg:col-span-3">
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">
+            <i class="fa-regular fa-calendar-check text-indigo-500 mr-1.5"></i> วันที่สิ้นสุด (เดินทางกลับ)
+          </label>
+          <div class="relative">
+            <input 
+              type="date" 
+              id="input-end-date" 
+              class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-800 transition"
+            >
+          </div>
+        </div>
+
+        <!-- Days Badge indicator (1 col) -->
+        <div class="lg:col-span-1 flex flex-col justify-end">
+          <div class="h-[42px] px-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl flex flex-col items-center justify-center text-center">
+            <span id="display-days" class="text-sm font-black leading-none">4</span>
+            <span class="text-[9px] font-medium leading-tight">วัน</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Second Row: Quick Duration Presets & Submit Button -->
+      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pt-2">
+        <!-- Duration helper chips -->
+        <div class="flex flex-wrap items-center gap-1.5 text-xs">
+          <span class="text-slate-400 font-medium mr-1">ระยะเวลา:</span>
+          <button class="duration-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 rounded-lg text-slate-600 font-medium transition" data-days="3">3 วัน (สุดสัปดาห์)</button>
+          <button class="duration-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 rounded-lg text-slate-600 font-medium transition active-chip" data-days="4">4 วัน</button>
+          <button class="duration-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 rounded-lg text-slate-600 font-medium transition" data-days="5">5 วัน</button>
+          <button class="duration-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 rounded-lg text-slate-600 font-medium transition" data-days="7">7 วัน (1 สัปดาห์)</button>
+          <button class="duration-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 rounded-lg text-slate-600 font-medium transition" data-days="10">10 วัน</button>
+          <button class="duration-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 rounded-lg text-slate-600 font-medium transition" data-days="14">14 วัน (2 สัปดาห์)</button>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="shrink-0">
+          <button 
+            id="btn-generate-plan" 
+            class="w-full md:w-auto py-2.5 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-md shadow-blue-500/25 transition-all transform active:scale-[0.98] flex items-center justify-center space-x-2"
+          >
+            <span id="btn-generate-text">สร้างรายการจัดกระเป๋า</span>
+            <i id="btn-generate-icon" class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+            <!-- Spinner -->
+            <svg id="btn-generate-spinner" class="hidden animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick City Chips -->
+      <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-1.5 text-xs">
+        <span class="text-slate-400 font-medium mr-1">เมืองยอดนิยม:</span>
+        <button class="city-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-slate-600 transition" data-city="Tokyo">🇯🇵 โตเกียว</button>
+        <button class="city-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-slate-600 transition" data-city="Seoul">🇰🇷 โซล</button>
+        <button class="city-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-slate-600 transition" data-city="London">🇬🇧 ลอนดอน</button>
+        <button class="city-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-slate-600 transition" data-city="Paris">🇫🇷 ปารีส</button>
+        <button class="city-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-slate-600 transition" data-city="Chiang Mai">🇹🇭 เชียงใหม่</button>
+        <button class="city-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-slate-600 transition" data-city="Singapore">🇸🇬 สิงคโปร์</button>
+        <button class="city-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-lg text-slate-600 transition" data-city="Reykjavik">🇮🇸 เรคยาวิก (หนาว)</button>
+      </div>
+    </section>
+
+    <!-- Weather Dashboard Card (Shown when weather loaded) -->
+    <section id="weather-section" class="hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden">
+      <!-- Background Ambient Glow -->
+      <div class="absolute -top-24 -right-24 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -left-24 w-72 h-72 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 space-y-5">
+        <!-- Weather Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-700/60 pb-4">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-semibold uppercase tracking-wider text-blue-400 bg-blue-950/60 border border-blue-800/60 px-2.5 py-0.5 rounded-full">พยากรณ์อากาศแบบ Real-time</span>
+              <span id="weather-last-updated" class="text-xs text-slate-400"></span>
+            </div>
+            <h2 id="weather-city-title" class="text-2xl font-bold mt-1 text-white flex items-center gap-2">
+              <i class="fa-solid fa-plane-arrival text-blue-400 text-xl"></i>
+              <span>โตเกียว, ประเทศญี่ปุ่น</span>
+            </h2>
+            <div id="weather-date-range-badge" class="mt-1 text-xs text-indigo-200 font-medium flex items-center gap-1.5">
+              <i class="fa-regular fa-calendar-days text-indigo-400"></i>
+              <span id="weather-date-range-text">ช่วงวันเดินทาง</span>
+            </div>
+          </div>
+
+          <!-- Overall Temp & Badges -->
+          <div class="flex flex-wrap items-center gap-2" id="weather-summary-badges">
+            <!-- Dynamically populated tags -->
+          </div>
+        </div>
+
+        <!-- Weather Daily Forecast Carousel / Grid -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-medium text-slate-300">
+              <i class="fa-regular fa-calendar-check mr-1 text-blue-400"></i> สภาพอากาศรายวันช่วงเดินทาง (<span id="weather-forecast-days-label">4 วัน</span>):
+            </span>
+            <span class="text-[11px] text-slate-400">*ข้อมูลโดย Open-Meteo API</span>
+          </div>
+
+          <div id="weather-daily-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-2.5 overflow-x-auto pb-1">
+            <!-- Dynamically populated daily weather cards -->
+          </div>
+        </div>
+
+        <!-- Packing Weather Insights Banner -->
+        <div id="weather-insight-banner" class="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-3.5 text-sm flex items-start space-x-3">
+          <i class="fa-solid fa-lightbulb text-amber-300 text-lg mt-0.5 shrink-0"></i>
+          <div class="text-slate-200" id="weather-insight-text">
+            กำลังวิเคราะห์สภาพอากาศเพื่อเลือกสิ่งของที่เหมาะสม...
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Checklist & Progress Section -->
+    <section id="checklist-section" class="hidden space-y-5">
+
+      <!-- Progress Tracking Card -->
+      <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <div>
+            <div class="flex items-center space-x-2">
+              <h2 class="text-xl font-bold text-slate-900">รายการสิ่งของที่ต้องเตรียม</h2>
+              <span id="badge-total-items" class="bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">0 ชิ้น</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5" id="progress-status-text">ติ๊กเลือกเมื่อเก็บของลงกระเป๋าแล้ว ข้อมูลจะถูกบันทึกอัตโนมัติ</p>
+          </div>
+
+          <!-- Progress Percentage Display -->
+          <div class="flex items-center space-x-3">
+            <div class="text-right">
+              <div class="text-2xl font-black text-blue-600" id="progress-percent">0%</div>
+              <div class="text-[11px] text-slate-500" id="progress-count">จัดแล้ว 0 / 0 ชิ้น</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar Line -->
+        <div class="w-full bg-slate-100 rounded-full h-3.5 overflow-hidden border border-slate-200/80 p-0.5">
+          <div id="progress-bar-fill" class="progress-bar-fill bg-gradient-to-r from-blue-500 to-indigo-600 h-full rounded-full w-0"></div>
+        </div>
+
+        <!-- Toolbar: Filters & Quick Actions -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mt-5 pt-4 border-t border-slate-100 no-print">
+          <!-- Filter Tabs -->
+          <div class="inline-flex p-1 bg-slate-100 rounded-xl space-x-1 text-xs font-medium">
+            <button class="filter-tab px-3 py-1.5 rounded-lg transition bg-white text-slate-900 shadow-sm" data-filter="all">ทั้งหมด (<span id="count-all">0</span>)</button>
+            <button class="filter-tab px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900" data-filter="unpacked">ยังไม่เก็บ (<span id="count-unpacked">0</span>)</button>
+            <button class="filter-tab px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900" data-filter="packed">เก็บแล้ว (<span id="count-packed">0</span>)</button>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="btn-add-item-modal" class="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition flex items-center space-x-1">
+              <i class="fa-solid fa-plus"></i>
+              <span>เพิ่มของเอง</span>
+            </button>
+            <button id="btn-check-all" class="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+              <i class="fa-solid fa-check-double mr-1"></i> ติ๊กทั้งหมด
+            </button>
+            <button id="btn-uncheck-all" class="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+              <i class="fa-solid fa-xmark mr-1"></i> ยกเลิกทั้งหมด
+            </button>
+            <button id="btn-save-trip-bookmark" class="px-3 py-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition flex items-center space-x-1">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>บันทึกทริปนี้</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Checklist Categories Container -->
+      <div id="categories-container" class="space-y-4">
+        <!-- Dynamically rendered category cards & items -->
+      </div>
+    </section>
+
+    <!-- Empty State / Welcome Screen -->
+    <section id="empty-state" class="bg-white rounded-2xl p-10 sm:p-14 text-center border border-slate-200 shadow-sm space-y-4">
+      <div class="w-20 h-20 mx-auto rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-3xl shadow-inner">
+        <i class="fa-solid fa-map-location-dot"></i>
+      </div>
+      <div class="max-w-md mx-auto">
+        <h3 class="text-xl font-bold text-slate-800">พร้อมจัดกระเป๋าแล้วหรือยัง?</h3>
+        <p class="text-sm text-slate-500 mt-1">
+          เลือกเมืองปลายทางและช่วงวันเดินทางด้านบน เพื่อให้ระบบดึงข้อมูลพยากรณ์อากาศแบบตรงวัน และคำนวณสิ่งที่ต้องเตรียมให้ทันที!
+        </p>
+      </div>
+      <div class="pt-2 flex justify-center gap-2">
+        <button class="px-4 py-2 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition" onclick="document.getElementById('input-city').focus()">
+          เริ่มค้นหาเมืองเลย <i class="fa-solid fa-arrow-up ml-1"></i>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-5 text-center text-xs text-slate-400 no-print mt-auto">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div>Smart Packing List &copy; 2026 • ข้อมูลสภาพอากาศแม่นยำจาก Open-Meteo API</div>
+      <div class="flex items-center space-x-3 text-slate-500">
+        <span><i class="fa-solid fa-database text-emerald-500 mr-1"></i>บันทึกอัตโนมัติ (LocalStorage)</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL: Add Custom Item -->
+  <div id="modal-add-item" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-slate-900/50">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-100">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-circle-plus text-blue-600"></i> เพิ่มสิ่งของในรายการ
+        </h3>
+        <button id="btn-close-add-modal" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="form-add-item" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อสิ่งของ *</label>
+          <input type="text" id="add-item-name" required placeholder="เช่น กล้องถ่ายรูป, คอนแทคเลนส์, ขาตั้งกล้อง" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">จำนวน</label>
+            <input type="number" id="add-item-qty" min="1" max="99" value="1" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">หน่วย</label>
+            <input type="text" id="add-item-unit" value="ชิ้น" placeholder="ชิ้น, อัน, ตัว, ชุด" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">หมวดหมู่</label>
+          <select id="add-item-category" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">หมายเหตุ / เหตุผล (ไม่บังคับ)</label>
+          <input type="text" id="add-item-reason" placeholder="เช่น ใช้ถ่ายภาพกลางคืน" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100">
+          <button type="button" id="btn-cancel-add" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition">ยกเลิก</button>
+          <button type="submit" class="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition">เพิ่มรายการ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Saved Trips History -->
+  <div id="modal-history" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-slate-900/50">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-slate-100 max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left text-blue-600"></i> ทริปที่บันทึกไว้ใน LocalStorage
+        </h3>
+        <button id="btn-close-history-modal" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div id="history-trips-list" class="flex-grow overflow-y-auto space-y-2.5 pr-1">
+        <!-- Populated via JS -->
+      </div>
+
+      <div class="flex items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-500">
+        <span>บันทึกประวัติสูงสุด 20 ทริป</span>
+        <button id="btn-close-history-footer" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg font-medium text-slate-700 transition">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Export / Share Options -->
+  <div id="modal-export" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop bg-slate-900/50">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-100">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-share-from-square text-indigo-600"></i> แชร์หรือส่งออกรายการ
+        </h3>
+        <button id="btn-close-export-modal" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2.5">
+        <button id="btn-action-copy-text" class="w-full p-3 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-xl flex items-center space-x-3 text-left transition group">
+          <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-lg shrink-0 group-hover:scale-105 transition">
+            <i class="fa-solid fa-copy"></i>
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-slate-800">คัดลอกข้อความ (Copy to Clipboard)</div>
+            <div class="text-xs text-slate-500">คัดลอกรายการเช็กลิสต์ทั้งหมดนำไปส่งใน LINE หรือ Note</div>
+          </div>
+        </button>
+
+        <button id="btn-action-print" class="w-full p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 rounded-xl flex items-center space-x-3 text-left transition group">
+          <div class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg shrink-0 group-hover:scale-105 transition">
+            <i class="fa-solid fa-print"></i>
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-slate-800">พิมพ์หรือบันทึกเป็น PDF (Print)</div>
+            <div class="text-xs text-slate-500">พิมพ์ใบเช็กลิสต์แบบกระดาษหรือเซฟเป็นไฟล์ PDF</div>
+          </div>
+        </button>
+
+        <button id="btn-action-download-json" class="w-full p-3 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 rounded-xl flex items-center space-x-3 text-left transition group">
+          <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg shrink-0 group-hover:scale-105 transition">
+            <i class="fa-solid fa-file-code"></i>
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-slate-800">ดาวน์โหลดเป็น JSON</div>
+            <div class="text-xs text-slate-500">สำรองข้อมูลโครงสร้างครบถ้วนสำหรับนักพัฒนา</div>
+          </div>
+        </button>
+      </div>
+
+      <div class="pt-2 text-center">
+        <button id="btn-close-export-footer" class="px-4 py-2 text-xs font-medium text-slate-500 hover:text-slate-800 transition">ปิดหน้าต่าง</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none">
+    <!-- Populated via showToast() -->
+  </div>
+
+  <!-- Main JavaScript Application (ES Modules) -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

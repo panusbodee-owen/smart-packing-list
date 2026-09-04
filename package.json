@@ -1,0 +1,9 @@
+{
+  "name": "smart-packing-list",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Smart Packing List Web App",
+  "scripts": {
+    "test": "node test_engine.js"
+  }
+}
