@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Packing List - จัดกระเป๋าเดินทางตามสภาพอากาศและคำนวณน้ำหนักกระเป๋า</title>
+  <title>Smart Packing List - จัดกระเป๋าตามสภาพอากาศ, คำนวณงบ & ชั่งน้ำหนักกระเป๋า</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome 6 Icons -->
@@ -22,7 +22,7 @@
         </div>
         <div>
           <h1 class="text-lg font-bold text-slate-900 leading-tight">Smart Packing List</h1>
-          <p class="text-xs text-slate-500">จัดกระเป๋าอัตโนมัติ & จำลองน้ำหนักกระเป๋าเดินทาง</p>
+          <p class="text-xs text-slate-500">จัดกระเป๋าอัตโนมัติ • คำนวณงบทริป • จำลองน้ำหนักกระเป๋า</p>
         </div>
       </div>
 
@@ -221,7 +221,165 @@
       </div>
     </section>
 
-    <!-- Luggage Weight Calculator Card (NEW FEATURE) -->
+    <!-- NEW SECTION: Trip Budget & Booking Hub (คำนวณงบประมาณ, อัตราแลกเปลี่ยน, & ทางลัดจองตั๋ว) -->
+    <section id="budget-section" class="hidden bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-5">
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-sm">
+            <i class="fa-solid fa-coins"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">คำนวณงบประมาณ & อัตราแลกเปลี่ยน (Trip Budget)</h2>
+            <p class="text-xs text-slate-500">วางแผนงบประมาณทริปแบบ Real-time พร้อมเรทแลกเงินและทางลัดจองตั๋ว</p>
+          </div>
+        </div>
+
+        <!-- Live Currency Rate Badge -->
+        <div class="bg-emerald-50/80 border border-emerald-200/80 rounded-xl px-3 py-1.5 flex items-center space-x-2 text-xs">
+          <i class="fa-solid fa-arrow-right-arrow-left text-emerald-600"></i>
+          <span class="text-slate-600 font-medium">เรทแลกเงินวันนี้:</span>
+          <span id="budget-exchange-rate-text" class="font-bold text-emerald-700">1 THB ≈ 4.73 JPY</span>
+        </div>
+      </div>
+
+      <!-- Quick Booking Shortcuts (UX Booster) -->
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100/80 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-ticket text-blue-600"></i>
+          <span class="text-xs font-bold text-slate-800">ค้นหาและจองตั๋วช่วงวันเดินทาง:</span>
+          <span id="booking-city-date-label" class="text-xs text-slate-500 hidden sm:inline"></span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <a id="link-search-flights" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-plane-departure text-[11px]"></i>
+            <span>ค้นหาตั๋วเครื่องบิน</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75"></i>
+          </a>
+          <a id="link-search-hotels" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold shadow-sm transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-hotel text-amber-500 text-[11px]"></i>
+            <span>ค้นหาที่พัก</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75"></i>
+          </a>
+          <a id="link-search-activities" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold shadow-sm transition flex items-center space-x-1.5">
+            <i class="fa-solid fa-ticket-simple text-rose-500 text-[11px]"></i>
+            <span>ตั๋วสถานที่เที่ยว</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Budget Calculator Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        
+        <!-- Interactive Budget Form (7 cols) -->
+        <div class="lg:col-span-7 space-y-3">
+          <div class="text-xs font-bold text-slate-700 flex items-center justify-between">
+            <span>หมวดหมู่ค่าใช้จ่ายโดยประมาณ (บาท):</span>
+            <button id="btn-suggest-budget" class="text-[11px] text-blue-600 hover:underline flex items-center gap-1 font-medium">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> คำนวณแนะนำอัตโนมัติ
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+            <!-- Flights -->
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+              <label class="block text-slate-500 mb-1 font-medium">✈️ ตั๋วเครื่องบิน & เดินทางไป-กลับ</label>
+              <div class="relative">
+                <input type="number" id="budget-flights" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none" value="12000">
+                <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 font-medium">฿</span>
+              </div>
+            </div>
+
+            <!-- Hotel -->
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+              <label class="block text-slate-500 mb-1 font-medium">🏨 ที่พักตลอดทริป</label>
+              <div class="relative">
+                <input type="number" id="budget-hotel" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none" value="8000">
+                <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 font-medium">฿</span>
+              </div>
+            </div>
+
+            <!-- Food & Transport -->
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+              <label class="block text-slate-500 mb-1 font-medium">🍜 ค่าอาหาร & เดินทางในเมือง</label>
+              <div class="relative">
+                <input type="number" id="budget-food" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none" value="6000">
+                <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 font-medium">฿</span>
+              </div>
+            </div>
+
+            <!-- Activities -->
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+              <label class="block text-slate-500 mb-1 font-medium">🎟️ บัตรผ่าน & ค่าเข้าชม</label>
+              <div class="relative">
+                <input type="number" id="budget-activities" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none" value="3000">
+                <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 font-medium">฿</span>
+              </div>
+            </div>
+
+            <!-- Shopping -->
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+              <label class="block text-slate-500 mb-1 font-medium">🛍️ ช้อปปิ้งของฝาก</label>
+              <div class="relative">
+                <input type="number" id="budget-shopping" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none" value="5000">
+                <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 font-medium">฿</span>
+              </div>
+            </div>
+
+            <!-- Emergency -->
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+              <label class="block text-slate-500 mb-1 font-medium">🚨 งบสำรองฉุกเฉิน</label>
+              <div class="relative">
+                <input type="number" id="budget-emergency" min="0" step="100" class="budget-input w-full pl-3 pr-8 py-1.5 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none" value="2000">
+                <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 font-medium">฿</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Budget Summary & Currency Card (5 cols) -->
+        <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl p-5 space-y-4 shadow-md">
+          <div>
+            <span class="text-xs uppercase tracking-wider text-emerald-400 font-bold">งบประมาณรวมทั้งทริป</span>
+            <div class="flex items-baseline space-x-2 mt-1">
+              <span id="budget-total-thb" class="text-3xl font-black text-white">36,000</span>
+              <span class="text-sm font-bold text-slate-300">บาท (THB)</span>
+            </div>
+            <!-- Converted currency -->
+            <div class="mt-1 text-sm text-emerald-300 font-semibold flex items-center gap-1.5">
+              <span>≈</span>
+              <span id="budget-total-foreign" class="text-lg font-bold">170,280</span>
+              <span id="budget-foreign-currency-code">JPY</span>
+            </div>
+          </div>
+
+          <!-- Per-day Average -->
+          <div class="border-t border-slate-700/80 pt-3 flex items-center justify-between text-xs">
+            <span class="text-slate-400">งบเฉลี่ยต่อวัน:</span>
+            <span id="budget-daily-average" class="font-bold text-slate-200">9,000 ฿/วัน (42,570 JPY)</span>
+          </div>
+
+          <!-- Quick Converter Tool in Card -->
+          <div class="border-t border-slate-700/80 pt-3 space-y-2">
+            <span class="text-[11px] font-semibold text-slate-400">เครื่องคิดเลขแปลงค่าเงินด่วน:</span>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <label class="block text-[10px] text-slate-400 mb-0.5">บาท (THB)</label>
+                <input type="number" id="quick-convert-thb" placeholder="1000" class="w-full px-2.5 py-1.5 bg-slate-800/90 border border-slate-600 rounded-lg text-white font-bold text-xs focus:ring-1 focus:ring-emerald-400 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-400 mb-0.5" id="quick-convert-foreign-label">สกุลเงินท้องถิ่น</label>
+                <input type="number" id="quick-convert-foreign" placeholder="4730" class="w-full px-2.5 py-1.5 bg-slate-800/90 border border-slate-600 rounded-lg text-white font-bold text-xs focus:ring-1 focus:ring-emerald-400 focus:outline-none">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Luggage Weight Calculator Card -->
     <section id="weight-section" class="hidden bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
         <div class="flex items-center space-x-3">
@@ -373,7 +531,7 @@
       <div class="max-w-md mx-auto">
         <h3 class="text-xl font-bold text-slate-800">พร้อมจัดกระเป๋าแล้วหรือยัง?</h3>
         <p class="text-sm text-slate-500 mt-1">
-          เลือกเมืองปลายทางและช่วงวันเดินทางด้านบน เพื่อให้ระบบดึงข้อมูลพยากรณ์อากาศแบบตรงวัน พร้อมคำนวณสิ่งที่ต้องเตรียมและจำลองน้ำหนักกระเป๋าให้อัตโนมัติ!
+          เลือกเมืองปลายทางและช่วงวันเดินทางด้านบน เพื่อให้ระบบดึงข้อมูลพยากรณ์อากาศแบบตรงวัน พร้อมคำนวณงบประมาณและจำลองน้ำหนักกระเป๋าให้อัตโนมัติ!
         </p>
       </div>
       <div class="pt-2 flex justify-center gap-2">
@@ -388,11 +546,13 @@
   <!-- Footer -->
   <footer class="bg-white border-t border-slate-200 py-5 text-center text-xs text-slate-400 no-print mt-auto">
     <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-      <div>Smart Packing List &copy; 2026 • ข้อมูลสภาพอากาศแม่นยำจาก Open-Meteo API</div>
+      <div>Smart Packing List &copy; 2026 • ข้อมูลสภาพอากาศ Open-Meteo & เรทแลกเงิน Interbank</div>
       <div class="flex items-center space-x-3 text-slate-500">
-        <span><i class="fa-solid fa-scale-balanced text-amber-500 mr-1"></i>คำนวณน้ำหนักกระเป๋า</span>
+        <span><i class="fa-solid fa-coins text-emerald-500 mr-1"></i>คำนวณงบประมาณ</span>
         <span>•</span>
-        <span><i class="fa-solid fa-database text-emerald-500 mr-1"></i>บันทึกอัตโนมัติ (LocalStorage)</span>
+        <span><i class="fa-solid fa-scale-balanced text-amber-500 mr-1"></i>ชั่งน้ำหนักกระเป๋า</span>
+        <span>•</span>
+        <span><i class="fa-solid fa-database text-blue-500 mr-1"></i>บันทึก LocalStorage</span>
       </div>
     </div>
   </footer>
@@ -492,7 +652,7 @@
           </div>
           <div>
             <div class="text-sm font-semibold text-slate-800">คัดลอกข้อความ (Copy to Clipboard)</div>
-            <div class="text-xs text-slate-500">คัดลอกรายการเช็กลิสต์และสรุปน้ำหนักนำไปส่งใน LINE หรือ Note</div>
+            <div class="text-xs text-slate-500">คัดลอกรายการเช็กลิสต์, สรุปงบประมาณ และน้ำหนักนำไปส่งใน LINE</div>
           </div>
         </button>
 

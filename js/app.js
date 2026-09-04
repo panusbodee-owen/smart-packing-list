@@ -2,6 +2,7 @@ import { APP_CONFIG, CATEGORIES } from './config.js';
 import { WeatherService } from './weatherService.js';
 import { PackingEngine } from './packingEngine.js';
 import { StorageService } from './storageService.js';
+import { CurrencyService } from './currencyService.js';
 
 class SmartPackingApp {
   constructor() {
@@ -24,6 +25,23 @@ class SmartPackingApp {
         limitKg: 20,
         emptyBagKg: 3.8,
         packedOnly: false
+      },
+      currency: {
+        code: 'JPY',
+        symbol: '¥',
+        rateToTarget: 4.73,
+        oneTargetInTHB: 0.21
+      },
+      budget: {
+        flights: 12000,
+        hotel: 8000,
+        food: 6000,
+        activities: 3000,
+        shopping: 5000,
+        emergency: 2000,
+        totalTHB: 36000,
+        totalForeign: 170280,
+        dailyAverageTHB: 9000
       }
     };
 
@@ -48,8 +66,30 @@ class SmartPackingApp {
       // Sections
       emptyState: document.getElementById('empty-state'),
       weatherSection: document.getElementById('weather-section'),
+      budgetSection: document.getElementById('budget-section'),
       weightSection: document.getElementById('weight-section'),
       checklistSection: document.getElementById('checklist-section'),
+
+      // Budget & Currency Elements
+      budgetExchangeRateText: document.getElementById('budget-exchange-rate-text'),
+      bookingCityDateLabel: document.getElementById('booking-city-date-label'),
+      linkSearchFlights: document.getElementById('link-search-flights'),
+      linkSearchHotels: document.getElementById('link-search-hotels'),
+      linkSearchActivities: document.getElementById('link-search-activities'),
+      btnSuggestBudget: document.getElementById('btn-suggest-budget'),
+      budgetFlights: document.getElementById('budget-flights'),
+      budgetHotel: document.getElementById('budget-hotel'),
+      budgetFood: document.getElementById('budget-food'),
+      budgetActivities: document.getElementById('budget-activities'),
+      budgetShopping: document.getElementById('budget-shopping'),
+      budgetEmergency: document.getElementById('budget-emergency'),
+      budgetTotalThb: document.getElementById('budget-total-thb'),
+      budgetTotalForeign: document.getElementById('budget-total-foreign'),
+      budgetForeignCurrencyCode: document.getElementById('budget-foreign-currency-code'),
+      budgetDailyAverage: document.getElementById('budget-daily-average'),
+      quickConvertThb: document.getElementById('quick-convert-thb'),
+      quickConvertForeign: document.getElementById('quick-convert-foreign'),
+      quickConvertForeignLabel: document.getElementById('quick-convert-foreign-label'),
 
       // Luggage Scale Elements
       selectBaggagePreset: document.getElementById('select-baggage-preset'),
@@ -214,6 +254,8 @@ class SmartPackingApp {
         chip.className = 'duration-chip px-2.5 py-1 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 rounded-lg text-slate-600 font-medium transition';
       }
     });
+
+    this.updateBookingLinks();
   }
 
   bindEvents() {
@@ -234,6 +276,42 @@ class SmartPackingApp {
       this.state.baggage.packedOnly = e.target.checked;
       this.updateLuggageWeight();
       this.persistCurrentTrip();
+    });
+
+    // Budget Input listeners
+    const budgetInputs = [
+      this.dom.budgetFlights,
+      this.dom.budgetHotel,
+      this.dom.budgetFood,
+      this.dom.budgetActivities,
+      this.dom.budgetShopping,
+      this.dom.budgetEmergency
+    ];
+    budgetInputs.forEach(input => {
+      input.addEventListener('input', () => {
+        this.calculateBudget();
+        this.persistCurrentTrip();
+      });
+    });
+
+    // Suggest Budget Button
+    this.dom.btnSuggestBudget.addEventListener('click', () => {
+      this.suggestBudgetForTrip();
+      this.persistCurrentTrip();
+      this.showToast('คำนวณงบประมาณแนะนำเรียบร้อยแล้ว', 'info');
+    });
+
+    // Quick Currency Converter Inputs
+    this.dom.quickConvertThb.addEventListener('input', (e) => {
+      const thb = parseFloat(e.target.value) || 0;
+      const rate = this.state.currency.rateToTarget || 1;
+      this.dom.quickConvertForeign.value = Math.round(thb * rate);
+    });
+
+    this.dom.quickConvertForeign.addEventListener('input', (e) => {
+      const foreign = parseFloat(e.target.value) || 0;
+      const rate = this.state.currency.rateToTarget || 1;
+      this.dom.quickConvertThb.value = rate > 0 ? Math.round(foreign / rate) : 0;
     });
 
     // Date changes
@@ -415,6 +493,7 @@ class SmartPackingApp {
         this.state.selectedCity = city;
         this.dom.inputCity.value = `${city.name}, ${city.country}`;
         this.dom.autocompleteList.classList.add('hidden');
+        this.updateBookingLinks();
       });
       this.dom.autocompleteList.appendChild(item);
     });
@@ -429,6 +508,7 @@ class SmartPackingApp {
       if (results && results.length > 0) {
         this.state.selectedCity = results[0];
         this.dom.inputCity.value = `${results[0].name}, ${results[0].country}`;
+        this.updateBookingLinks();
       }
     } catch (e) {
       console.error(e);
@@ -450,6 +530,119 @@ class SmartPackingApp {
       this.dom.btnGenerateSpinner.classList.add('hidden');
       this.dom.btnGeneratePlan.disabled = false;
     }
+  }
+
+  updateBookingLinks() {
+    const cityName = this.state.selectedCity?.name || this.dom.inputCity.value.trim() || 'Tokyo';
+    const start = this.state.startDate;
+    const end = this.state.endDate;
+
+    this.dom.bookingCityDateLabel.textContent = `(${cityName} • ${start} ถึง ${end})`;
+
+    // Google Flights Link
+    this.dom.linkSearchFlights.href = `https://www.google.com/travel/flights?q=Flights%20to%20${encodeURIComponent(cityName)}%20from%20Bangkok%20on%20${start}%20through%20${end}`;
+
+    // Agoda Link
+    this.dom.linkSearchHotels.href = `https://www.agoda.com/search?text=${encodeURIComponent(cityName)}&checkIn=${start}&checkOut=${end}`;
+
+    // Klook Link
+    this.dom.linkSearchActivities.href = `https://www.klook.com/th/search/result/?query=${encodeURIComponent(cityName)}`;
+  }
+
+  async updateCurrencyAndRates() {
+    const city = this.state.selectedCity;
+    const countryCode = city?.countryCode || 'JP';
+    const countryName = city?.country || 'Japan';
+
+    const curr = CurrencyService.getCurrencyForCountry(countryCode, countryName);
+    const rateInfo = await CurrencyService.getRateInfo(curr.code);
+
+    this.state.currency = {
+      code: curr.code,
+      name: curr.name,
+      symbol: curr.symbol,
+      rateToTarget: rateInfo.rateToTarget,
+      oneTargetInTHB: rateInfo.oneTargetInTHB
+    };
+
+    // Update Currency labels in DOM
+    this.dom.budgetExchangeRateText.textContent = `1 THB ≈ ${rateInfo.rateToTarget.toFixed(2)} ${curr.code}`;
+    this.dom.budgetForeignCurrencyCode.textContent = curr.code;
+    this.dom.quickConvertForeignLabel.textContent = `${curr.name} (${curr.code})`;
+
+    // Update Quick converter sample
+    this.dom.quickConvertThb.value = '1000';
+    this.dom.quickConvertForeign.value = Math.round(1000 * rateInfo.rateToTarget);
+  }
+
+  suggestBudgetForTrip() {
+    const days = this.state.days || 4;
+    const countryCode = this.state.selectedCity?.countryCode?.toUpperCase() || 'JP';
+    const nights = Math.max(1, days - 1);
+
+    let flight = 12000;
+    let hotelPerNight = 2500;
+    let foodPerDay = 1500;
+    let activities = 3000;
+    let shopping = 5000;
+
+    // Adjust by country tier
+    if (['JP', 'KR', 'SG', 'IS', 'GB', 'FR', 'DE', 'CH', 'US', 'AU'].includes(countryCode)) {
+      flight = ['JP', 'KR'].includes(countryCode) ? 14000 : 28000;
+      hotelPerNight = 3200;
+      foodPerDay = 1800;
+      activities = 4000;
+      shopping = 8000;
+    } else if (['TH', 'VN'].includes(countryCode)) {
+      flight = 2500;
+      hotelPerNight = 1200;
+      foodPerDay = 800;
+      activities = 1500;
+      shopping = 3000;
+    }
+
+    this.dom.budgetFlights.value = flight;
+    this.dom.budgetHotel.value = hotelPerNight * nights;
+    this.dom.budgetFood.value = foodPerDay * days;
+    this.dom.budgetActivities.value = activities;
+    this.dom.budgetShopping.value = shopping;
+    this.dom.budgetEmergency.value = 2000;
+
+    this.calculateBudget();
+  }
+
+  calculateBudget() {
+    const flights = parseFloat(this.dom.budgetFlights.value) || 0;
+    const hotel = parseFloat(this.dom.budgetHotel.value) || 0;
+    const food = parseFloat(this.dom.budgetFood.value) || 0;
+    const activities = parseFloat(this.dom.budgetActivities.value) || 0;
+    const shopping = parseFloat(this.dom.budgetShopping.value) || 0;
+    const emergency = parseFloat(this.dom.budgetEmergency.value) || 0;
+
+    const totalTHB = flights + hotel + food + activities + shopping + emergency;
+    const rate = this.state.currency.rateToTarget || 1;
+    const totalForeign = Math.round(totalTHB * rate);
+    const days = Math.max(1, this.state.days || 1);
+    const dailyAverageTHB = Math.round(totalTHB / days);
+    const dailyAverageForeign = Math.round(totalForeign / days);
+
+    this.state.budget = {
+      flights,
+      hotel,
+      food,
+      activities,
+      shopping,
+      emergency,
+      totalTHB,
+      totalForeign,
+      dailyAverageTHB,
+      currencyCode: this.state.currency.code
+    };
+
+    // Update DOM
+    this.dom.budgetTotalThb.textContent = totalTHB.toLocaleString();
+    this.dom.budgetTotalForeign.textContent = totalForeign.toLocaleString();
+    this.dom.budgetDailyAverage.textContent = `${dailyAverageTHB.toLocaleString()} ฿/วัน (${dailyAverageForeign.toLocaleString()} ${this.state.currency.code})`;
   }
 
   async generatePackingPlan() {
@@ -474,6 +667,9 @@ class SmartPackingApp {
         this.dom.inputCity.value = `${searchResults[0].name}, ${searchResults[0].country}`;
       }
 
+      this.updateBookingLinks();
+      await this.updateCurrencyAndRates();
+
       // Fetch Weather Forecast with exact dates
       const weather = await WeatherService.getWeatherForecast(
         this.state.selectedCity.latitude,
@@ -492,8 +688,9 @@ class SmartPackingApp {
       );
       this.state.items = recommendedItems;
 
-      // Update luggage weight
+      // Update luggage weight & budget
       this.updateLuggageWeight();
+      this.suggestBudgetForTrip();
 
       // Save to LocalStorage
       this.persistCurrentTrip();
@@ -506,6 +703,7 @@ class SmartPackingApp {
       // Show sections
       this.dom.emptyState.classList.add('hidden');
       this.dom.weatherSection.classList.remove('hidden');
+      this.dom.budgetSection.classList.remove('hidden');
       this.dom.weightSection.classList.remove('hidden');
       this.dom.checklistSection.classList.remove('hidden');
 
@@ -605,7 +803,7 @@ class SmartPackingApp {
 
     // Print metadata
     this.dom.printTitle.textContent = `ใบจัดกระเป๋า: ${selectedCity.name}, ${selectedCity.country}`;
-    this.dom.printSubtitle.textContent = `ช่วงวัน: ${rangeText} | พยากรณ์อากาศ: ต่ำสุด ${summary.minTemp}°C / สูงสุด ${summary.maxTemp}°C | โอกาสฝน ${summary.maxRainProb}% | น้ำหนักกระเป๋า: ${this.state.baggage.totalKg || 0} kg`;
+    this.dom.printSubtitle.textContent = `ช่วงวัน: ${rangeText} | พยากรณ์อากาศ: ต่ำสุด ${summary.minTemp}°C / สูงสุด ${summary.maxTemp}°C | น้ำหนัก: ${this.state.baggage.totalKg || 0} kg | งบประมาณ: ${this.state.budget.totalTHB?.toLocaleString() || 0} บาท`;
 
     // Summary Badges
     this.dom.weatherSummaryBadges.innerHTML = `
@@ -944,27 +1142,41 @@ class SmartPackingApp {
       endDate: this.state.endDate,
       weather: this.state.weather,
       items: this.state.items,
-      baggage: this.state.baggage
+      baggage: this.state.baggage,
+      budget: this.state.budget
     };
     StorageService.saveCurrentTrip(payload);
   }
 
-  restoreTrip(tripData) {
+  async restoreTrip(tripData) {
     this.state.selectedCity = tripData.destination;
     this.state.days = tripData.days || 4;
     this.state.startDate = tripData.startDate || this.formatDateYMD(new Date());
     this.state.endDate = tripData.endDate || this.formatDateYMD(new Date(Date.now() + 3 * 86400000));
     this.state.weather = tripData.weather;
     this.state.items = tripData.items || [];
+
     if (tripData.baggage) {
       this.state.baggage = { ...this.state.baggage, ...tripData.baggage };
       this.dom.selectBaggagePreset.value = this.state.baggage.presetId || 'checked_20';
       this.dom.checkWeightPackedOnly.checked = !!this.state.baggage.packedOnly;
     }
 
+    if (tripData.budget) {
+      this.state.budget = { ...this.state.budget, ...tripData.budget };
+      this.dom.budgetFlights.value = this.state.budget.flights;
+      this.dom.budgetHotel.value = this.state.budget.hotel;
+      this.dom.budgetFood.value = this.state.budget.food;
+      this.dom.budgetActivities.value = this.state.budget.activities;
+      this.dom.budgetShopping.value = this.state.budget.shopping;
+      this.dom.budgetEmergency.value = this.state.budget.emergency;
+    }
+
     if (this.state.selectedCity) {
       this.dom.inputCity.value = `${this.state.selectedCity.name}, ${this.state.selectedCity.country}`;
       this.dom.btnClearCity.classList.remove('hidden');
+      this.updateBookingLinks();
+      await this.updateCurrencyAndRates();
     }
 
     this.dom.inputStartDate.value = this.state.startDate;
@@ -973,12 +1185,14 @@ class SmartPackingApp {
 
     if (this.state.weather) {
       this.updateLuggageWeight();
+      this.calculateBudget();
       this.renderWeatherDashboard();
       this.renderChecklist();
       this.updateProgress();
 
       this.dom.emptyState.classList.add('hidden');
       this.dom.weatherSection.classList.remove('hidden');
+      this.dom.budgetSection.classList.remove('hidden');
       this.dom.weightSection.classList.remove('hidden');
       this.dom.checklistSection.classList.remove('hidden');
     }
@@ -1003,6 +1217,7 @@ class SmartPackingApp {
     this.dom.displayDays.textContent = this.state.days;
 
     this.dom.weatherSection.classList.add('hidden');
+    this.dom.budgetSection.classList.add('hidden');
     this.dom.weightSection.classList.add('hidden');
     this.dom.checklistSection.classList.add('hidden');
     this.dom.emptyState.classList.remove('hidden');
@@ -1022,7 +1237,8 @@ class SmartPackingApp {
       endDate: this.state.endDate,
       weather: this.state.weather,
       items: this.state.items,
-      baggage: this.state.baggage
+      baggage: this.state.baggage,
+      budget: this.state.budget
     };
 
     const tripId = StorageService.saveTripToHistory(tripData);
@@ -1059,6 +1275,7 @@ class SmartPackingApp {
         const dateFormatted = new Date(trip.savedAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
         const dateRangeInfo = (trip.startDate && trip.endDate) ? `${this.formatDateThai(trip.startDate)} - ${this.formatDateThai(trip.endDate)}` : `${trip.days} วัน`;
         const weightInfo = trip.baggage ? ` • ⚖️ ${trip.baggage.totalKg || 0} kg` : '';
+        const budgetInfo = trip.budget ? ` • 💰 ${trip.budget.totalTHB?.toLocaleString() || 0} ฿` : '';
 
         item.innerHTML = `
           <div class="cursor-pointer flex-grow pr-3" data-trip-id="${trip.id}">
@@ -1069,7 +1286,7 @@ class SmartPackingApp {
             <div class="text-xs text-slate-400 mt-0.5 flex items-center gap-2 flex-wrap">
               <span>📅 ${dateRangeInfo}</span>
               <span>•</span>
-              <span class="text-blue-600 font-medium">เก็บแล้ว ${packed}/${total} ชิ้น${weightInfo}</span>
+              <span class="text-blue-600 font-medium">เก็บแล้ว ${packed}/${total} ชิ้น${weightInfo}${budgetInfo}</span>
             </div>
           </div>
           <div class="flex items-center space-x-1 shrink-0">
@@ -1112,7 +1329,8 @@ class SmartPackingApp {
       endDate: this.state.endDate,
       weather: this.state.weather,
       items: this.state.items,
-      baggage: this.state.baggage
+      baggage: this.state.baggage,
+      budget: this.state.budget
     };
     const text = StorageService.generateTextExport(tripData);
 
@@ -1122,7 +1340,7 @@ class SmartPackingApp {
     }
 
     navigator.clipboard.writeText(text).then(() => {
-      this.showToast('คัดลอกรายการและน้ำหนักลงคลิปบอร์ดเรียบร้อยแล้ว!', 'success');
+      this.showToast('คัดลอกรายการและงบประมาณลงคลิปบอร์ดแล้ว!', 'success');
       this.dom.modalExport.classList.add('hidden');
     }).catch(err => {
       console.error(err);
@@ -1139,6 +1357,7 @@ class SmartPackingApp {
       weather: this.state.weather,
       items: this.state.items,
       baggage: this.state.baggage,
+      budget: this.state.budget,
       exportedAt: new Date().toISOString()
     };
 

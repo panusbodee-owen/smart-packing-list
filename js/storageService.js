@@ -68,6 +68,7 @@ export class StorageService {
         weather: tripData.weather,
         items: tripData.items,
         baggage: tripData.baggage || null,
+        budget: tripData.budget || null,
         savedAt: new Date().toISOString()
       };
 
@@ -121,7 +122,7 @@ export class StorageService {
   static generateTextExport(tripData) {
     if (!tripData || !tripData.items) return '';
 
-    const { destination, days, startDate, endDate, weather, items, baggage } = tripData;
+    const { destination, days, startDate, endDate, weather, items, baggage, budget } = tripData;
     const destName = destination ? `${destination.name}, ${destination.country}` : 'ทริปเดินทาง';
     const minT = weather?.summary?.minTemp ?? '-';
     const maxT = weather?.summary?.maxTemp ?? '-';
@@ -132,7 +133,12 @@ export class StorageService {
     text += `🌡️ อุณหภูมิ: ${minT}°C ถึง ${maxT}°C | โอกาสฝนสูงสุด: ${weather?.summary?.maxRainProb ?? 0}%\n`;
     
     if (baggage && baggage.totalKg !== undefined) {
-      text += `⚖️ น้ำหนักกระเป๋าโดยประมาณ: ${baggage.totalKg} kg (โควตา ${baggage.limitKg} kg | เหลือพื้นที่ช้อปปิ้ง ${baggage.remainingKg} kg)\n`;
+      text += `⚖️ น้ำหนักกระเป๋า: ${baggage.totalKg} kg (โควตา ${baggage.limitKg} kg | เหลือช้อปปิ้ง ${baggage.remainingKg} kg)\n`;
+    }
+
+    if (budget && budget.totalTHB !== undefined) {
+      const foreignStr = budget.currencyCode ? ` (≈ ${budget.totalForeign?.toLocaleString()} ${budget.currencyCode})` : '';
+      text += `💰 งบประมาณรวม: ${budget.totalTHB?.toLocaleString()} บาท${foreignStr} | เฉลี่ยวันละ ${budget.dailyAverageTHB?.toLocaleString()} บาท\n`;
     }
 
     text += `----------------------------------------\n\n`;
@@ -169,7 +175,7 @@ export class StorageService {
     const packedCount = items.filter(i => i.checked).length;
     const percent = Math.round((packedCount / items.length) * 100) || 0;
     text += `📊 สถานะ: จัดแล้ว ${packedCount}/${items.length} รายการ (${percent}%)\n`;
-    text += `สร้างโดย Smart Packing List (Weather-based Auto Packing & Luggage Scale)\n`;
+    text += `สร้างโดย Smart Packing List (Weather, Luggage Scale & Budget Planner)\n`;
 
     return text;
   }
