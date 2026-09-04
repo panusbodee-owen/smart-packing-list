@@ -42,7 +42,12 @@
 ### 6. 🔍 Search Engine Optimization (SEO & Social Sharing)
 - **Meta Tags & Open Graph**: ตั้งค่า Title, Description, Canonical URL, Keywords และ Open Graph / Twitter Card ครบถ้วน
 - **Schema.org Structured Data**: ใส่ JSON-LD WebApplication และ TravelApplication เพื่อรองรับ Google Rich Snippets
-- **Crawlers Support**: มี `sitemap.xml` และ `robots.txt` พร้อม Favicon (SVG) และภาพปก Social Share Image (1200x630)
+- **Crawlers Support**: มี `sitemap.xml` และ `robots.txt` พร้อม Favicon (SVG & PNG) และภาพปก Social Share Image (1200x630)
+
+### 7. 🛍️ Smart Travel Gear & Affiliate Monetization (ช้อปอุปกรณ์ตรงตามสภาพอากาศ)
+- **ระบบแนะนำอุปกรณ์ตามสภาพอากาศ**: แนะนำเสื้อขนเป็ด/Heattech (หนาว), แผ่นแปะความร้อน, ร่มพับกัน UV (ฝน), และของจำเป็นขึ้นเครื่องบิน
+- **ปุ่มหาซื้อสินค้าในเช็กลิสต์ (Inline Shopping Badges)**: มีปุ่มลัด `[🛒 หาซื้อ]` เชื่อมไปยัง Shopee / Lazada โดยอัตโนมัติตามประเภทสิ่งของ
+- **รองรับ Affiliate Tracking ID**: สามารถกำหนด Tracking ID ของ Shopee, Lazada, และ Klook ใน `js/config.js` เพื่อสร้างรายได้ (Monetization) ได้ทันที
 
 ---
 

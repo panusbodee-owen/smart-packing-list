@@ -650,6 +650,33 @@
         </div>
       </div>
 
+      <!-- Smart Travel Gear Recommendations (Affiliate Shopping: Shopee / Lazada / Klook) -->
+      <div id="affiliate-gear-card" class="bg-gradient-to-br from-amber-500/5 via-orange-500/5 to-rose-500/5 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-rose-950/20 rounded-2xl p-4 sm:p-5 border border-amber-200/60 dark:border-amber-800/40 space-y-3.5 no-print">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 flex items-center justify-center text-sm shadow-sm shrink-0">
+              <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-800 dark:text-white text-sm sm:text-base flex items-center gap-1.5 flex-wrap">
+                <span>ไอเทมแนะนำสำหรับทริปนี้</span>
+                <span class="text-[10px] font-bold text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-950 px-2 py-0.5 rounded-full">จัดตามสภาพอากาศ</span>
+              </h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">คัดสรรอุปกรณ์จำเป็นที่ช่วยให้เดินทางราบรื่น ไม่ติดขัดที่สนามบินและหน้างาน</p>
+            </div>
+          </div>
+          <div class="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
+            <i class="fa-solid fa-store text-orange-500"></i>
+            <span>ค้นหาและช้อปผ่าน Shopee / Lazada / Klook</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Gear Grid Container -->
+        <div id="affiliate-gear-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+          <!-- Dynamically populated via renderAffiliateGear() -->
+        </div>
+      </div>
+
       <!-- Checklist Categories Container -->
       <div id="categories-container" class="space-y-3 sm:space-y-4">
         <!-- Dynamically rendered category cards & items -->

@@ -27,7 +27,54 @@ export const APP_CONFIG = {
     { id: 'checked_20', name: 'โหลดใต้เครื่อง 20 kg (มาตรฐาน)', limitKg: 20, emptyBagKg: 3.8, icon: 'fa-suitcase-rolling' },
     { id: 'checked_23', name: 'โหลดใต้เครื่อง 23 kg (ไฟลต์อินเตอร์)', limitKg: 23, emptyBagKg: 4.0, icon: 'fa-plane' },
     { id: 'checked_30', name: 'โหลดใต้เครื่อง 30 kg (ฟูลเซอร์วิส)', limitKg: 30, emptyBagKg: 4.5, icon: 'fa-weight-hanging' }
-  ]
+  ],
+  AFFILIATE: {
+    ENABLED: true,
+    // ใส่ Affiliate Tracking ID ของ Shopee / Lazada / Klook ได้ที่นี่
+    TRACKING_IDS: {
+      SHOPEE: '', // ตัวอย่าง: 'panusbodee_shopee'
+      LAZADA: '',
+      KLOOK: ''
+    },
+    PLATFORMS: {
+      SHOPEE: {
+        name: 'Shopee',
+        badge: 'ช้อป Shopee',
+        icon: 'fa-bag-shopping',
+        searchUrl: (kw) => `https://shopee.co.th/search?keyword=${encodeURIComponent(kw)}`
+      },
+      LAZADA: {
+        name: 'Lazada',
+        badge: 'ช้อป Lazada',
+        icon: 'fa-store',
+        searchUrl: (kw) => `https://www.lazada.co.th/catalog/?q=${encodeURIComponent(kw)}`
+      },
+      KLOOK: {
+        name: 'Klook',
+        badge: 'จอง Klook',
+        icon: 'fa-ticket',
+        searchUrl: (dest) => `https://www.klook.com/th/search/result/?query=${encodeURIComponent(dest || 'eSIM ท่องเที่ยว')}`
+      }
+    },
+    // คำค้นหาสินค้าสำหรับลิงก์ Affiliate อัตโนมัติในเช็กลิสต์
+    ITEM_KEYWORDS: {
+      'ขนเป็ด': 'เสื้อกันหนาวขนเป็ด Ultra Light Down',
+      'โค้ท': 'เสื้อโค้ทกันหนาว',
+      'Heattech': 'เสื้อ Heattech ลองจอนกันหนาว',
+      'ลองจอน': 'กางเกงลองจอนกันหนาว',
+      'แผ่นแปะความร้อน': 'แผ่นแปะความร้อนกันหนาว Hot Pack',
+      'ร่ม': 'ร่มพับกันแดดกันฝน น้ำหนักเบา',
+      'เสื้อกันฝน': 'เสื้อกันฝนพกพา',
+      'หัวแปลงปลั๊ก': 'Universal Travel Adapter ปลั๊กแปลงสากล',
+      'พาวเวอร์แบงก์': 'พาวเวอร์แบงค์ 10000-20000 mAh ขึ้นเครื่องบิน',
+      'รองเท้าบูท': 'รองเท้าบูทกันหนาวลุยหิมะ',
+      'ถุงมือ': 'ถุงมือกันหนาว ทัชสกรีน',
+      'ผ้าพันคอ': 'ผ้าพันคอกันหนาว',
+      'กระเป๋าจัดระเบียบ': 'กระเป๋าจัดระเบียบเสื้อผ้า Packing Cubes',
+      'ชั่งน้ำหนัก': 'เครื่องชั่งน้ําหนักกระเป๋าเดินทางแบบพกพา ดิจิทัล',
+      'ขวดแบ่ง': 'ชุดขวดซิลิโคนแบ่งของเหลว 100ml ขึ้นเครื่องบิน'
+    }
+  }
 };
 
 export const CATEGORIES = {
